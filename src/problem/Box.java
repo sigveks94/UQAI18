@@ -3,7 +3,6 @@ package problem;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-
 /**
  * This class represents one of the rectangular obstacles in Assignment 1.
  * 
