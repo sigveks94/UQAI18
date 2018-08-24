@@ -8,6 +8,7 @@ import java.awt.geom.Rectangle2D;
  * This class represents one of the rectangular obstacles in Assignment 1.
  * 
  * @author Sergiy Dudnikov
+ * 
  */
 public abstract class Box {
 	/** Stores the box as a Rectangle2D */
