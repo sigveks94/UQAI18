@@ -309,7 +309,7 @@ public class Tester {
     }
 
     /**
-     * Normalises an angle to the range (2pi, 4pi]
+     * Normalises an angle to the range (2pi, 4pi] /////// THIS HAS GOT TO BE WRONG? (0, 2pi]?
      *
      * @param angle
      *            the angle to normalise.
