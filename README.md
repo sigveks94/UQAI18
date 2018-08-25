@@ -63,3 +63,14 @@ TO DO: META-LEVEL:
 
 
 
+STRATEGY: 
+
+SAMPLE: Sample nodes randomly across the board - discard nodes in collision
+
+EDGES: Connect the k nearest nodes with euclidean distance less than d. If this cannot be done, add additional nodes to the sample around the area of the troubled node - repeat until all nodes are connected to at least k other nodes. Include checking of edges so that they only allow edges that are "wide enough" to allow worst case scenario of boxes and agent to pass through crevice. 
+
+PATH: Connect start and goal node to a neighboring node and perform an a*-search to find a path. 
+
+MOVE: Actually move box
+
+REDO FOR ALL BOXES. KEEP NODES AND EDGES, BUT CHECK IF THEY ARE STILL VALID IN THIS NEW SITUATION/CONFIGURATION WEREAS A BOX HAS BEEN MOVED. IF SOME ARE NOT VALID - REDO EDGES-PHASE
