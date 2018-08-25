@@ -54,7 +54,9 @@ TO DO: META-LEVEL:
 1) Generate C-space from given input - already implemented in source code
 2) Analyse C-space to map to fitting strategy (eg: calculate total area occupied by obstacles, number of boxes etc)
 3) Sample-phase
+	--> see 7.1.3 in additional litterature from MIT for different sampling strategies. 
 4) Route-phase
+	--> have to be careful about the 0.001 restrict in movement. Possible strategy (?) ; connect nodes in the 			roadmap created from the sample, and move the box along the edge connecting these nodes by 0.001? Can´t 			think 	of any quicker way to solve. Will be a lot of computing if we should sample nodes with 0.001 			density.
 5) Moving-phase
 6) Recurrence of 3,4,5 for each box
 7) Validity-checking-phase
