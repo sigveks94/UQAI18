@@ -50,5 +50,14 @@ Make a search taking you to a place where there are obstacles. Just use a path i
 NB: Don´t need to worry about collision-checking.
 
 
+TO DO: META-LEVEL:
+1) Generate C-space from given input - already implemented in source code
+2) Analyse C-space to map to fitting strategy (eg: calculate total area occupied by obstacles, number of boxes etc)
+3) Sample-phase
+4) Route-phase
+5) Moving-phase
+6) Recurrence of 3,4,5 for each box
+7) Validity-checking-phase
+
 
 
