@@ -65,9 +65,9 @@ TO DO: META-LEVEL:
 
 STRATEGY - A VARIANT OF THE PRM: 
 
-SAMPLE: Sample nodes randomly across the board - discard nodes in collision
+SAMPLE: Sample nodes randomly across the board - discard nodes in collision - nodes must be sampled on either the same x-or y-value of neigboring nodes since robot can only move boxes perpendicularly.  
 
-EDGES: Connect the k nearest nodes with euclidean distance less than d. If this cannot be done, add additional nodes to the sample around the area of the troubled node - repeat until all nodes are connected to at least k other nodes. Include checking of edges so that they only allow edges that are "wide enough" to allow worst case scenario of boxes and agent to pass through crevice. 
+EDGES: Connect the k nearest nodes with euclidean distance less than d. If this cannot be done, add additional nodes to the sample around the area of the troubled node - repeat until all nodes are connected to at least k other nodes. Include checking of edges so that they only allow edges that are "wide enough" to allow worst case scenario of boxes and agent to pass through crevice. All edges used to move boxes must be perpendicular.
 
 PATH: Connect start and goal node to a neighboring node and perform an a*-search to find a path. 
 
