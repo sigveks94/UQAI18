@@ -63,7 +63,7 @@ TO DO: META-LEVEL:
 
 
 
-STRATEGY: 
+STRATEGY - A VARIANT OF THE PRM: 
 
 SAMPLE: Sample nodes randomly across the board - discard nodes in collision
 
