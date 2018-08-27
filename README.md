@@ -65,11 +65,11 @@ TO DO: META-LEVEL:
 
 STRATEGY - A VARIANT OF THE PRM: 
 
-SAMPLE: Sample nodes randomly across the board - discard nodes in collision - nodes must be sampled on either the same x-or y-value of neigboring nodes since robot can only move boxes perpendicularly. Higher density of nodes around the obstacles should be implemented (eg: one node around each corner).
+SAMPLE: Sample nodes randomly across the board - discard nodes in collision - nodes must be sampled on either the same x-or y-value of neigboring nodes since robot can only move boxes perpendicularly. Higher density of nodes around the obstacles should be implemented (eg: one node around each corner). Remember to sample the nodes around each corner at such a distance that the box can move around the obstacle.
 
 EDGES: Connect the k nearest nodes with euclidean distance less than d. If this cannot be done, add additional nodes to the sample around the area of the troubled node - repeat until all nodes are connected to at least k other nodes. Include checking of edges so that they only allow edges that are "wide enough" to allow worst case scenario of boxes and agent to pass through crevice. All edges used to move boxes must be perpendicular. Perhaps not needing to add edges between nodes that are already indirectly connected through other noeigboring nodes to speed up the building phase.
 
-PATH: Connect start and goal node to a neighboring node and perform an a*-search to find a path. 
+PATH: Connect start and goal node to a neighboring node and perform an a*-search to find a path. Use the number of robot steps as costs between edges. Use the straight line calculation of number of robot steps from a node to the goal node as heuristic function.
 
 MOVE: Actually move box
 
