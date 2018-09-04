@@ -171,3 +171,4 @@ public boolean isCollisionFreePoint(Point2D point) {
 }
 
 }
+
