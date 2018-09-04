@@ -7,7 +7,7 @@ public class Node {
 private Point2D pos;
 
 public Node(Point2D pos) {
-	this.pos = (Point2D) pos.clone();
+	this.pos = (Point2D) pos;
 }
 
 public Point2D getPos() {
