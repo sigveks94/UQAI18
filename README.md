@@ -47,7 +47,6 @@ Make a search taking you to a place where there are obstacles. Just use a path i
 
 	Sample-strategy or discretization strategy?
 
-NB: Don´t need to worry about collision-checking.
 
 
 TO DO: META-LEVEL:
