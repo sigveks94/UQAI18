@@ -8,14 +8,15 @@ import problem.*;
 
 
 public class Solver {
-	ProblemSpec ps;
+	private ProblemSpec ps;
+	private List<Node> nodes;
+	private final double width = ps.getRobotWidth();	
 	
 	public Solver(ProblemSpec ps) {
 		this.ps=ps;
 	}
 	
-private List<Node> nodes;
-private final double width = ps.getRobotWidth();
+
 
 public void makeInitialSampling() {
 	for(Box movingbox: ps.getMovingBoxes()){
