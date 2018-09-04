@@ -24,6 +24,7 @@ public void makeInitialSampling() {
 		}
 	}
 	
+	
 	for(Box movingobstacle: ps.getMovingObstacles()) {
 		Point2D centerobst = getCenter(movingobstacle);
 		for(int i = 1 ; i < 5 ; i++) {
