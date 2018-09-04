@@ -6,4 +6,5 @@ public class Solver {
 	
 private List<Node> path;
 
+
 }
