@@ -3,11 +3,15 @@ package solver;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class Node {
+import problem.Box;
+
+public abstract class Node {
 	
 private Point2D pos;
 
 private ArrayList<Node> edgeNodes;
+
+//Maybe save the nodes possible to reach if a movable obstacle/box were moved??
 
 public Node(Point2D pos) {
 	this.pos = (Point2D) pos;
