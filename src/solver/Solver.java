@@ -300,8 +300,11 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 				}
 			}
 		}
+	return true;
 	}
 	
+
+
 	
 	
 	
@@ -369,5 +372,3 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 	 * 
 	 * 
 	 */
-}
-
