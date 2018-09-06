@@ -306,9 +306,7 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 
 
 	
-	
-	
-	
+		
 }
 
 	/*
