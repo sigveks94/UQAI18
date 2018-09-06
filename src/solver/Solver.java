@@ -16,6 +16,7 @@ public class Solver {
 	private HashMap<Box,List<Node>> boxNodes;
 	private HashMap<StaticObstacle, List<Node>> staticObstacleNodes;
 	
+	
 	public Solver(ProblemSpec ps) {
 		this.ps= ps;
 		nodes = new ArrayList<>();

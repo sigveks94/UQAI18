@@ -14,10 +14,6 @@ public class Main {
             Solver solver = new Solver(ps);
             solver.makeInitialSampling();
             solver.makeInitialEdges();
-            List<Node> nodes = solver.getAllNodes();
-            for(Node n : nodes) {
-            	System.out.println(n.toString());
-            }
             ps.loadSolution("output2.txt");
         } catch (IOException e) {
             System.out.println("IO Exception occured");
