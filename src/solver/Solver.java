@@ -12,12 +12,16 @@ import problem.*;
 public class Solver {
 	private ProblemSpec ps;
 	private List<Node> nodes;
-	private final double width = ps.getRobotWidth();
+	private final double width;
 	private HashMap<Box,List<Node>> boxNodes;
+	private HashMap<StaticObstacle, List<Node>> staticObstacleNodes;
 	
 	public Solver(ProblemSpec ps) {
-		this.ps=ps;
+		this.ps= ps;
+		nodes = new ArrayList<>();
+		width = ps.getRobotWidth();
 		boxNodes = new HashMap<>();
+		staticObstacleNodes  = new HashMap<>();
 	}
 
 	
@@ -28,7 +32,9 @@ public void makeInitialSampling() {
 		List<Node> familyNodes = new ArrayList<>();
 		for(int i = 1 ; i < 5 ; i++) {
 			Node node = addNode(movingbox,center,i);
-			familyNodes.add(node);
+			if(node != null) {
+				familyNodes.add(node);
+			}
 		}
 		boxNodes.put(movingbox, familyNodes);
 	}
@@ -40,15 +46,22 @@ public void makeInitialSampling() {
 		List<Node> familyNodes = new ArrayList<>();
 		for(int i = 1 ; i < 5 ; i++) {
 			Node node = addNode(movingobstacle,centerobst,i);
-			familyNodes.add(node);
+			if(node != null) {
+				familyNodes.add(node);
+			}
 		}
 		boxNodes.put(movingobstacle, familyNodes);
 	}
 	
 	for(StaticObstacle so : ps.getStaticObstacles()) {
+		List<Node> familyNodes = new ArrayList<>();
 		for(int i = 1; i < 5; i++) {
-			addNode(so,i);
+			Node node = addNode(so,i);
+			if(node != null) {
+				familyNodes.add(node);
+			}
 		}
+		staticObstacleNodes.put(so, familyNodes);
 	}
 	
 }
@@ -155,12 +168,14 @@ public Node addNode(Box b, Point2D center, int i) {
 	return null;
 }
 
-public void addNode(StaticObstacle obstacle, int i) {
+public Node addNode(StaticObstacle obstacle, int i) {
 	//BOTTOM LEFT
 	if(i==1) {
 		Point2D bl = new Point2D.Double(obstacle.getRect().getMinX() - (width/2), obstacle.getRect().getMinY()-(width/2));
 		if(isCollisionFreePoint(bl)) {
-			nodes.add(new BoxNode(bl));
+			Node node = new ObstacleNode(bl);
+			nodes.add(node);
+			return node;
 		}
 	}
 	
@@ -168,7 +183,9 @@ public void addNode(StaticObstacle obstacle, int i) {
 	if(i==2) {
 		Point2D br = new Point2D.Double(obstacle.getRect().getMaxX() + (width/2), obstacle.getRect().getMinY()-(width/2));
 		if(isCollisionFreePoint(br)) {
-			nodes.add(new BoxNode(br));
+			Node node = new ObstacleNode(br);
+			nodes.add(node);
+			return node;
 		}
 	}
 	
@@ -176,7 +193,9 @@ public void addNode(StaticObstacle obstacle, int i) {
 	if(i==3) {
 		Point2D tl = new Point2D.Double(obstacle.getRect().getMinX() - (width/2), obstacle.getRect().getMaxY()+(width/2));
 		if(isCollisionFreePoint(tl)) {
-			nodes.add(new BoxNode(tl));
+			Node node = new ObstacleNode(tl);
+			nodes.add(node);
+			return node;
 		}
 	}
 	
@@ -184,9 +203,12 @@ public void addNode(StaticObstacle obstacle, int i) {
 	if(i==4) {
 		Point2D tr = new Point2D.Double(obstacle.getRect().getMaxX() + (width/2), obstacle.getRect().getMaxY()+(width/2));
 		if(isCollisionFreePoint(tr)) {
-			nodes.add(new BoxNode(tr));
+			Node node = new ObstacleNode(tr);
+			nodes.add(node);
+			return node;
 		}
 	}
+	return null;
 	
 }
 
@@ -317,6 +339,9 @@ public void createBoxEdges(Box b){
 	}
 	
 	for(Node n : nodesToBox) {
+		if(n == null) {
+			return;
+		}
 		if(n.getPos().getX() < getCenter(b).getX()) {
 			if(n.getPos().getY() < getCenter(b).getY()) {
 				node1 = n;
@@ -371,9 +396,97 @@ public void createBoxEdges(Box b){
 
 public void createStaticObstacleEdges(StaticObstacle so){
 	
+	List<Node> nodesToStaticObstacle = staticObstacleNodes.get(so);
+	
+	Node node1 = null;
+	Node node2 = null;
+	Node node3 = null;
+	Node node4 = null;
+	
+	if(nodesToStaticObstacle.isEmpty()) {
+		return;
+	}
+	
+	for(Node n : nodesToStaticObstacle) {
+		if(n.getPos().getX() < so.getRect().getCenterX()) {
+			if(n.getPos().getY() < so.getRect().getCenterY()) {
+				node1 = n;
+			}
+			else {
+				node3 = n;
+			}
+		}
+		else {
+			if(n.getPos().getY() < so.getRect().getCenterY()) {
+				node2 = n;
+			}
+			else {
+				node4 = n;
+			}
+		}
+	}
+	
+	//Lower edge
+	if(node1 != null && node2 != null) {
+		if(isCollisionFreeEdge(node1, node2)) {
+			node1.addEdge(node2);
+			node2.addEdge(node1);
+		}
+	}
+	
+	//Right edge
+	if(node2 != null && node4 != null) {
+		if(isCollisionFreeEdge(node2, node4)) {
+			node2.addEdge(node4);
+			node4.addEdge(node2);
+		}
+	}
+	
+	//Upper edge
+	if(node4 != null && node3 != null) {
+		if(isCollisionFreeEdge(node4, node3)) {
+			node4.addEdge(node3);
+			node3.addEdge(node4);
+		}
+	}
+	
+	//Left edge
+	if(node3 != null && node1 != null) {
+		if(isCollisionFreeEdge(node3, node1)) {
+			node3.addEdge(node1);
+			node1.addEdge(node3);
+		}
+	}
+	
+}
+
+public void makeInitialEdges() {
+	for(Box b : ps.getMovingBoxes()) {
+		createBoxEdges(b);
+	}
+	
+	for(Box b : ps.getMovingObstacles()) {
+		createBoxEdges(b);
+	}
+	
+	for(StaticObstacle so : ps.getStaticObstacles()) {
+		createStaticObstacleEdges(so);
+	}
+}
+
+public List<Node> getAllNodes(){
+	return nodes;
 }
 
 
+public HashMap<Box, List<Node>> getBoxNodes() {
+	return boxNodes;
+}
+
+
+public HashMap<StaticObstacle, List<Node>> getStaticObstacleNodes() {
+	return staticObstacleNodes;
+}
 
 }
 

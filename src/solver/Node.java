@@ -9,7 +9,7 @@ public abstract class Node {
 	
 private Point2D pos;
 
-private ArrayList<Node> edgeNodes;
+private ArrayList<Node> edgeNodes = new ArrayList<>();
 
 //Maybe save the nodes possible to reach if a movable obstacle/box were moved??
 
@@ -22,6 +22,9 @@ public Point2D getPos() {
 }
 
 public void addEdge(Node node) {
+	if(node == null) {
+		return;
+	}
 	edgeNodes.add(node);
 }
 
@@ -35,6 +38,10 @@ public void setPos(Point2D pos) {
 
 public double calculateDistance(Node node) {
 	return this.pos.distance(node.getPos());
+}
+
+public String toString() {
+	return this.pos.toString();
 }
 
 }

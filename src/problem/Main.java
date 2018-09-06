@@ -1,16 +1,24 @@
 package problem;
 
 import java.io.IOException;
+import java.util.List;
 
+import solver.Node;
 import solver.Solver;
 
 public class Main {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input1.txt");
+            ps.loadProblem("input2.txt");
             Solver solver = new Solver(ps);
-            ps.loadSolution("output1.txt");
+            solver.makeInitialSampling();
+            solver.makeInitialEdges();
+            List<Node> nodes = solver.getAllNodes();
+            for(Node n : nodes) {
+            	System.out.println(n.toString());
+            }
+            ps.loadSolution("output2.txt");
         } catch (IOException e) {
             System.out.println("IO Exception occured");
         }
