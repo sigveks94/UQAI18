@@ -302,12 +302,81 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 		}
 	return true;
 	}
-	
 
-
+public void createBoxEdges(Box b){
 	
-		
+	List<Node> nodesToBox = boxNodes.get(b);
+	
+	Node node1 = null;
+	Node node2 = null;
+	Node node3 = null;
+	Node node4 = null;
+	
+	if(nodesToBox.isEmpty()) {
+		return;
+	}
+	
+	for(Node n : nodesToBox) {
+		if(n.getPos().getX() < getCenter(b).getX()) {
+			if(n.getPos().getY() < getCenter(b).getY()) {
+				node1 = n;
+			}
+			else {
+				node3 = n;
+			}
+		}
+		else {
+			if(n.getPos().getY() < getCenter(b).getY()) {
+				node2 = n;
+			}
+			else {
+				node4 = n;
+			}
+		}
+	}
+	
+	//Lower edge
+	if(node1 != null && node2 != null) {
+		if(isCollisionFreeEdge(node1, node2)) {
+			node1.addEdge(node2);
+			node2.addEdge(node1);
+		}
+	}
+	
+	//Right edge
+	if(node2 != null && node4 != null) {
+		if(isCollisionFreeEdge(node2, node4)) {
+			node2.addEdge(node4);
+			node4.addEdge(node2);
+		}
+	}
+	
+	//Upper edge
+	if(node4 != null && node3 != null) {
+		if(isCollisionFreeEdge(node4, node3)) {
+			node4.addEdge(node3);
+			node3.addEdge(node4);
+		}
+	}
+	
+	//Left edge
+	if(node3 != null && node1 != null) {
+		if(isCollisionFreeEdge(node3, node1)) {
+			node3.addEdge(node1);
+			node1.addEdge(node3);
+		}
+	}
+	
 }
+
+public void createStaticObstacleEdges(StaticObstacle so){
+	
+}
+
+
+
+}
+
 
 	/*
 	 * 
@@ -370,3 +439,4 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 	 * 
 	 * 
 	 */
+
