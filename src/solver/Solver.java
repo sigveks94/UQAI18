@@ -17,6 +17,8 @@ public class Solver {
 	private ProblemSpec ps;
 	private List<Node> nodes;
 	private final double width;
+	private final double fakeWidth;
+	private final double fakeHalfWidth;
 	private HashMap<Box,List<Node>> boxNodes;
 	private HashMap<StaticObstacle, List<Node>> staticObstacleNodes;
 	private final double halfWidth;
@@ -27,14 +29,28 @@ public class Solver {
 		nodes = new ArrayList<>();
 		halfWidth = doubleFormatter(ps.getRobotWidth()/2);
 		width = doubleFormatter(ps.getRobotWidth());
+		fakeWidth = doubleFormatter(ps.getRobotWidth() + 0.0001);
+		fakeHalfWidth = doubleFormatter((ps.getRobotWidth()/2) + 0.0001);
 		boxNodes = new HashMap<>();
 		staticObstacleNodes  = new HashMap<>();
 	}
 
+
+/**
+ * Makes the initial sampling of the free space.
+ * Retrieves center point of the box
+ * Sample nodes at each corner of an obstacle if point not in collision.
+ * i = 1 --> bottom left point
+ * i = 2 --> bottom right point
+ * i = 3 --> top left point
+ * i = 4 --> top right point
+ * 
+ * Connects all nodes created to the box. 
+ * 
+ */
 	
 public void makeInitialSampling() {
 	for(Box movingbox: ps.getMovingBoxes()){
-		
 		Point2D center = getCenter(movingbox);
 		List<Node> familyNodes = new ArrayList<>();
 		for(int i = 1 ; i < 5 ; i++) {
@@ -79,17 +95,24 @@ public void makeInitialSampling() {
  * @param center
  * @param i
  * 
+ * Checks whether the Box is a movingBox or movingObstacle.
+ * 
+ * Creates a 2DPoint at such distance from the box so that a movingBox just could get around.
+ * Referenced from center-point.
+ * 
  * i = 1 means bottom left corner
  * i = 2 means bottom right corner
  * i = 3 means top left corner
  * i = 4 means top right corner
+ * 
+ * @return Node
  */
 
 public Node addNode(Box b, Point2D center, int i) {
 	if(b instanceof MovingBox) {
 		if(i==1) {
-			Double x = doubleFormatter(center.getX() - (width));
-			Double y = doubleFormatter(center.getY() - (width));
+			Double x = doubleFormatter(center.getX() - (fakeWidth));
+			Double y = doubleFormatter(center.getY() - (fakeWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode(p);
@@ -98,8 +121,8 @@ public Node addNode(Box b, Point2D center, int i) {
 			}
 		}
 		if(i==2) {
-			Double x = doubleFormatter(center.getX() + (width));
-			Double y = doubleFormatter(center.getY() - (width));
+			Double x = doubleFormatter(center.getX() + (fakeWidth));
+			Double y = doubleFormatter(center.getY() - (fakeWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode(p);
@@ -108,8 +131,8 @@ public Node addNode(Box b, Point2D center, int i) {
 			}
 		}
 		if(i==3) {
-			Double x = doubleFormatter(center.getX() - (width));
-			Double y = doubleFormatter(center.getY() + (width));
+			Double x = doubleFormatter(center.getX() - (fakeWidth));
+			Double y = doubleFormatter(center.getY() + (fakeWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode(p);
@@ -118,8 +141,8 @@ public Node addNode(Box b, Point2D center, int i) {
 			}
 		}
 		if(i==4) {
-			Double x = doubleFormatter(center.getX() + (width));
-			Double y = doubleFormatter(center.getY() + (width));
+			Double x = doubleFormatter(center.getX() + (fakeWidth));
+			Double y = doubleFormatter(center.getY() + (fakeWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode (p);
@@ -134,8 +157,8 @@ public Node addNode(Box b, Point2D center, int i) {
 		double obswidthHalf = doubleFormatter(obswidth/2);
 		
 		if(i==1) {
-			Double x = doubleFormatter(center.getX() - (obswidthHalf + halfWidth));
-			Double y = doubleFormatter(center.getY() - (obswidthHalf + halfWidth));
+			Double x = doubleFormatter(center.getX() - (obswidthHalf + fakeHalfWidth));
+			Double y = doubleFormatter(center.getY() - (obswidthHalf + fakeHalfWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode(p);
@@ -144,8 +167,8 @@ public Node addNode(Box b, Point2D center, int i) {
 			}
 		}
 		if(i==2) {
-			Double x = doubleFormatter(center.getX() + (obswidthHalf + halfWidth));
-			Double y = doubleFormatter(center.getY() - (obswidthHalf + halfWidth));
+			Double x = doubleFormatter(center.getX() + (obswidthHalf + fakeHalfWidth));
+			Double y = doubleFormatter(center.getY() - (obswidthHalf + fakeHalfWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode(p);
@@ -154,8 +177,8 @@ public Node addNode(Box b, Point2D center, int i) {
 			}
 		}
 		if(i==3) {
-			Double x = doubleFormatter(center.getX() - (obswidthHalf + halfWidth));
-			Double y = doubleFormatter(center.getY() + (obswidthHalf + halfWidth));
+			Double x = doubleFormatter(center.getX() - (obswidthHalf + fakeHalfWidth));
+			Double y = doubleFormatter(center.getY() + (obswidthHalf + fakeHalfWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode(p);
@@ -164,8 +187,8 @@ public Node addNode(Box b, Point2D center, int i) {
 			}
 		}
 		if(i==4) {
-			Double x = doubleFormatter(center.getX() + (obswidthHalf + halfWidth));
-			Double y = doubleFormatter(center.getY() + (obswidthHalf + halfWidth));
+			Double x = doubleFormatter(center.getX() + (obswidthHalf + fakeHalfWidth));
+			Double y = doubleFormatter(center.getY() + (obswidthHalf + fakeHalfWidth));
 			Point2D p = new Point2D.Double(x, y);
 			if(isCollisionFreePoint(p)) {
 				Node node = new BoxNode(p);
@@ -177,10 +200,21 @@ public Node addNode(Box b, Point2D center, int i) {
 	return null;
 }
 
+/**
+ * 
+ * @param obstacle
+ * @param i
+ * @return Node
+ * 
+ * Create a 2DPoint at each corner of the static obstacle and make it a node sample if collision free.
+ *
+ * 
+ */
+
 public Node addNode(StaticObstacle obstacle, int i) {
 	//BOTTOM LEFT
 	if(i==1) {
-		Point2D bl = new Point2D.Double(doubleFormatter(obstacle.getRect().getMinX() - (halfWidth)), doubleFormatter(obstacle.getRect().getMinY()-(halfWidth)));
+		Point2D bl = new Point2D.Double(doubleFormatter(obstacle.getRect().getMinX() - (fakeHalfWidth)), doubleFormatter(obstacle.getRect().getMinY()-(fakeHalfWidth)));
 		if(isCollisionFreePoint(bl)) {
 			Node node = new ObstacleNode(bl);
 			nodes.add(node);
@@ -190,7 +224,7 @@ public Node addNode(StaticObstacle obstacle, int i) {
 	
 	//BOTTOM RIGHT
 	if(i==2) {
-		Point2D br = new Point2D.Double(doubleFormatter(obstacle.getRect().getMaxX() + (halfWidth)), doubleFormatter(obstacle.getRect().getMinY()-(halfWidth)));
+		Point2D br = new Point2D.Double(doubleFormatter(obstacle.getRect().getMaxX() + (fakeHalfWidth)), doubleFormatter(obstacle.getRect().getMinY()-(fakeHalfWidth)));
 		if(isCollisionFreePoint(br)) {
 			Node node = new ObstacleNode(br);
 			nodes.add(node);
@@ -200,7 +234,7 @@ public Node addNode(StaticObstacle obstacle, int i) {
 	
 	//TOP LEFT
 	if(i==3) {
-		Point2D tl = new Point2D.Double(doubleFormatter(obstacle.getRect().getMinX() - (halfWidth)), doubleFormatter(obstacle.getRect().getMaxY()+(halfWidth)));
+		Point2D tl = new Point2D.Double(doubleFormatter(obstacle.getRect().getMinX() - (fakeHalfWidth)), doubleFormatter(obstacle.getRect().getMaxY()+(fakeHalfWidth)));
 		if(isCollisionFreePoint(tl)) {
 			Node node = new ObstacleNode(tl);
 			nodes.add(node);
@@ -210,7 +244,7 @@ public Node addNode(StaticObstacle obstacle, int i) {
 	
 	//TOP RIGHT
 	if(i==4) {
-		Point2D tr = new Point2D.Double(doubleFormatter(obstacle.getRect().getMaxX() + (halfWidth)), doubleFormatter(obstacle.getRect().getMaxY()+(halfWidth)));
+		Point2D tr = new Point2D.Double(doubleFormatter(obstacle.getRect().getMaxX() + (fakeHalfWidth)), doubleFormatter(obstacle.getRect().getMaxY()+(fakeHalfWidth)));
 		if(isCollisionFreePoint(tr)) {
 			Node node = new ObstacleNode(tr);
 			nodes.add(node);
@@ -221,11 +255,32 @@ public Node addNode(StaticObstacle obstacle, int i) {
 	
 }
 
-private Double doubleFormatter(double d) {
+/**
+ * 
+ * @param d
+ * @return
+ * 
+ * Simple helper-method to format double values to 4 decimal points.
+ * 
+ */
+
+public static Double doubleFormatter(double d) {
 	NumberFormat formatter = new DecimalFormat("#0.0000");
 	String doubleString = formatter.format(d);
 	return Double.parseDouble(doubleString);
 }
+
+/**
+ * 
+ * @param point
+ * @return false if not inside board
+ * 
+ * point is the center-value. 
+ * Therefore X value has to be within range [0 + w/2 , 1 - w/2]
+ * similarly Y value has to be within range [0 + w/2 , 1 - w/2]
+ * 
+ * 
+ */
 
 public boolean isInsideBoard(Point2D point) {
 	if((point.getX() < 0 + (halfWidth)) || (point.getX() > 1 - (halfWidth))) {
@@ -236,6 +291,15 @@ public boolean isInsideBoard(Point2D point) {
 	}
 	return true;
 }
+
+/**
+ * 
+ * @param b
+ * @return
+ * 
+ * Returns the center value of box B.
+ * 
+ */
 
 public Point2D getCenter(Box b) {
 	//NumberFormat formatter = new DecimalFormat("#0.0000");
@@ -252,29 +316,40 @@ public Point2D getCenter(Box b) {
 	return p;
 }
 
+/**
+ * 
+ * @param Point2D point
+ * @return False if a point is outside the board or you can't fit a movingBox around the point without intersection. Else return true
+ * 
+ * Creates a fakeBox around the point as a center value.
+ * Checks whether this fake box intersects some of the obstacles.
+ * 
+ */
+
 public boolean isCollisionFreePoint(Point2D point) {
 	if(!(isInsideBoard(point))){
 		return false;
 	}
 	
-	//NumberFormat formatter = new DecimalFormat("#0.0000");
-	//String xDoubleString = formatter.format(point.getX()-(width/2));
-	//String yDoubleString = formatter.format(point.getY() - (width/2));
-	//double xValueDouble = Double.parseDouble(xDoubleString);
-	//double yValueDouble = Double.parseDouble(yDoubleString);
-	Rectangle2D rect = new Rectangle2D.Double(doubleFormatter(point.getX()-(halfWidth)), doubleFormatter(point.getY() - (halfWidth)), width, width);
+	
+	Rectangle2D fakeBox = new Rectangle2D.Double(doubleFormatter(point.getX() - (halfWidth)), doubleFormatter(point.getY() - (halfWidth)), width, width);
+	
 	for (Box b:ps.getMovingBoxes()) {
-		if(b.getRect().intersects(rect)) {
+		//System.out.println("Hi this is the moving box upper left node: " + b.getRect().getMinX() + " " + b.getRect().getMaxY());
+		//System.out.println("Hi this is the moving box upper right node: " + b.getRect().getMaxX() + " " + b.getRect().getMaxY());
+		if(b.getRect().intersects(fakeBox)) {
+			System.out.println(b.getRect().getCenterX() + " : " + b.getRect().getCenterY() + " nextbox" +
+				fakeBox.getCenterX() + " : " + fakeBox.getCenterY());
 			return false;
 		}
 	}
 	for (Box b:ps.getMovingObstacles()) {
-		if(b.getRect().intersects(rect)) {
+		if(b.getRect().intersects(fakeBox)) {
 			return false;
 		}
 	}
 	for (StaticObstacle o:ps.getStaticObstacles()) {
-		if(o.getRect().intersects(rect)) {
+		if(o.getRect().intersects(fakeBox)) {
 			return false;
 		}
 	}
@@ -283,6 +358,15 @@ public boolean isCollisionFreePoint(Point2D point) {
 	
 }
 
+/**
+ * 
+ * @param b
+ * 
+ * Retrieves the nodes connected to the box. Removes them from the nodeslist.
+ * 
+ */
+
+// IMPLEMENT LOGIC TO ALSO REMOVE EDGES.
 public void deleteBoxSampling(Box b) {
 	
 	List<Node> nodesConnectedToBox = new ArrayList<>();
@@ -296,6 +380,13 @@ public void deleteBoxSampling(Box b) {
 
 }
 
+/**
+ * 
+ * @param b
+ * 
+ * Creates a new sample of nodes around a box.
+ * 
+ */
 public void makeBoxSampling(Box b) {
 	Point2D center = getCenter(b);
 	List<Node> familyNodes = new ArrayList<>();
@@ -306,6 +397,19 @@ public void makeBoxSampling(Box b) {
 	boxNodes.put(b, familyNodes);
 }
 
+
+/**
+ * 
+ * @param Node from
+ * @param Node to
+ * @return true if collision free edge
+ * 
+ * 
+ * Identifies which nodes to connect.
+ * Creates a fakeBox around the node to start from. Checks in each iteration whether the fakeBox position intersects other obstacles.
+ * Center point moves width-steps each time.
+ * 
+ */
 public boolean isCollisionFreeEdge(Node from, Node to) {
 	
 	//Here we could implement logic/methods to find out which type of edge this is.
@@ -335,9 +439,9 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 	
 	if(from.getPos().getY() == to.getPos().getY()) {
 		if(from.getPos().getX() > to.getPos().getX()) {
-			for(int i = 1 ; i <= discretizations ; i++) {
+			for(int i = 1 ; i < discretizations ; i++) {
 				Point2D centerFakeBox = new Point2D.Double(doubleFormatter(from.getPos().getX() - (i*width)), doubleFormatter(from.getPos().getY()));
-				System.out.println(centerFakeBox);
+				//System.out.println(centerFakeBox);
 				if(!isCollisionFreePoint(centerFakeBox)) {
 					return false;
 					}
@@ -354,6 +458,23 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 		}
 	return true;
 	}
+
+/**
+ * 
+ * @param b
+ * 
+ * Retrieves the list of nodes connected to the box.
+ * Identifies which nodes are present.
+ * Again:
+ * 
+ * Node1 = bottom left node
+ * Node2 = bottom right node
+ * Node3 = top left node
+ * Node4 = top right node
+ * 
+ * 
+ * Checks whether the edges between the nodes are collision free, and if so stores the nodes in each others edgeList.
+ */
 
 public void createBoxEdges(Box b){
 	
@@ -412,7 +533,7 @@ public void createBoxEdges(Box b){
 			node4.addEdge(node3);
 			node3.addEdge(node4);
 		} else {
-			System.out.println("Something wrong in isCollisionFree");
+			System.out.println("Node 4 :" + node4 + " , Node3: " + node3);
 		}
 	}
 	
@@ -492,6 +613,10 @@ public void createStaticObstacleEdges(StaticObstacle so){
 	
 }
 
+
+/**
+ * creates initialEdges between nodes connected to boxes.
+ */
 public void makeInitialEdges() {
 	for(Box b : ps.getMovingBoxes()) {
 		createBoxEdges(b);

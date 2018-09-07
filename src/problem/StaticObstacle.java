@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+import solver.Solver;
+
 /**
  * This class represents one of the rectangular obstacles in Assignment 1.
  * 
@@ -29,7 +31,7 @@ public class StaticObstacle {
 	 *            the height of the obstacle.
 	 */
 	public StaticObstacle(double x, double y, double w, double h) {
-		this.rect = new Rectangle2D.Double(x, y, w, h);
+		this.rect = new Rectangle2D.Double(Solver.doubleFormatter(x), Solver.doubleFormatter(y), Solver.doubleFormatter(w), Solver.doubleFormatter(h));
 	}
 
 	/**

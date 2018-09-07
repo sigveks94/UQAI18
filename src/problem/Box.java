@@ -3,6 +3,8 @@ package problem;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import solver.Solver;
+
 /**
  * This class represents one of the rectangular obstacles in Assignment 1.
  * 
@@ -35,7 +37,7 @@ public abstract class Box {
 	 *            the height of the obstacle.
 	 */
 	public Box(double x, double y, double w, double h) {
-	    this.rect = new Rectangle2D.Double(x, y, w, h);
+	    this.rect = new Rectangle2D.Double(Solver.doubleFormatter(x), Solver.doubleFormatter(y), Solver.doubleFormatter(w), Solver.doubleFormatter(h));
 	}
 
 	/**
@@ -50,7 +52,7 @@ public abstract class Box {
 	public Box(Point2D pos, double width) {
 		this.pos = (Point2D) pos.clone();
 		this.width = width;
-        this.rect = new Rectangle2D.Double(pos.getX(), pos.getY(), width, width);
+        this.rect = new Rectangle2D.Double(Solver.doubleFormatter(pos.getX()), Solver.doubleFormatter(pos.getY()), Solver.doubleFormatter(width), Solver.doubleFormatter(width));
 	}
 
 	/**
@@ -71,7 +73,9 @@ public abstract class Box {
 	 * @return a copy of the Rectangle2D representing the box.
 	 */
 	public Rectangle2D getRect() {
-		return (Rectangle2D) rect.clone();
+		Rectangle2D clonedRectangle = new Rectangle2D.Double(Solver.doubleFormatter(pos.getX()), Solver.doubleFormatter(pos.getY()), Solver.doubleFormatter(width), Solver.doubleFormatter(width));
+		return clonedRectangle;
+				//(Rectangle2D) rect.clone();
 	}
 
 	/**

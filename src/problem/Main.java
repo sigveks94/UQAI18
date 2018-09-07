@@ -11,15 +11,15 @@ public class Main {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input2.txt");
+            ps.loadProblem("input1.txt");
             Solver solver = new Solver(ps);
             solver.makeInitialSampling();
             solver.makeInitialEdges();
             List<Node> nodes = solver.getAllNodes();
             for(Node n : nodes) {
-            	n.getEdges();
+            	System.out.println("Node " + n + " has edges " + n.getEdges());
             }
-            ps.loadSolution("output2.txt");
+            ps.loadSolution("output1.txt");
         } catch (IOException e) {
             System.out.println("IO Exception occured");
         }
