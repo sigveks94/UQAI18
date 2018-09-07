@@ -7,6 +7,7 @@ import solver.Node;
 import solver.Solver;
 
 public class Main {
+	
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
