@@ -22,6 +22,9 @@ public class Solver {
 	private HashMap<Box,List<Node>> boxNodes;
 	private HashMap<StaticObstacle, List<Node>> staticObstacleNodes;
 	private final double halfWidth;
+	private HashMap<StaticObstacle, List<StaticObstacle>> staticConnectedStatic; //HashMap of which static obstacles are connected to other static obstacles.
+	private HashMap<StaticObstacle, List<Box>> staticConnectedBox; //HashMap of which static obstacles are connected to other boxes.
+	private HashMap<Box, List<Box>> boxConnectedBox; //HashMap of which boxes are connected to other boxes.
 	
 	
 	public Solver(ProblemSpec ps) {
@@ -33,7 +36,19 @@ public class Solver {
 		fakeHalfWidth = doubleFormatter((ps.getRobotWidth()/2) + 0.0001);
 		boxNodes = new HashMap<>();
 		staticObstacleNodes  = new HashMap<>();
+		staticConnectedStatic = new HashMap<>();
+		staticConnectedBox = new HashMap<>();
+		boxConnectedBox = new HashMap<>();
+		initiateHashMaps();
 	}
+	
+	
+public void initiateHashMaps() {
+	for(Box b : ps.getMovingBoxes()) {
+		boxConnectedBox.put(b, new ArrayList<>());
+	}
+	//DoSame for staticObstacles
+}
 
 
 /**
@@ -338,8 +353,8 @@ public boolean isCollisionFreePoint(Point2D point) {
 		//System.out.println("Hi this is the moving box upper left node: " + b.getRect().getMinX() + " " + b.getRect().getMaxY());
 		//System.out.println("Hi this is the moving box upper right node: " + b.getRect().getMaxX() + " " + b.getRect().getMaxY());
 		if(b.getRect().intersects(fakeBox)) {
-			System.out.println(b.getRect().getCenterX() + " : " + b.getRect().getCenterY() + " nextbox" +
-				fakeBox.getCenterX() + " : " + fakeBox.getCenterY());
+			//System.out.println(b.getRect().getCenterX() + " : " + b.getRect().getCenterY() + " nextbox" +
+				//fakeBox.getCenterX() + " : " + fakeBox.getCenterY());
 			return false;
 		}
 	}
@@ -635,6 +650,114 @@ public List<Node> getAllNodes(){
 	return nodes;
 }
 
+//SuperMethod 
+public void createEdgesBetweenAllBoxes() {
+	
+	for(int i = 0; i < ps.getMovingBoxes().size() ; i++) {
+		for(int j = 1; j < ps.getMovingBoxes().size(); j++) {
+			if(i == j || boxConnectedBox.get(ps.getMovingBoxes().get(i)).contains(ps.getMovingBoxes().get(j))) {
+				continue;
+			} else {
+				connectTwoBoxes(ps.getMovingBoxes().get(i), ps.getMovingBoxes().get(j));
+			}
+		}
+	}
+	
+	
+	
+}
+
+
+
+private void connectTwoStaticObstacles(StaticObstacle so1, StaticObstacle so2) {
+	
+}
+
+private void connectBoxStaticObstacle(StaticObstacle so, Box b) {
+	
+}
+
+
+
+
+/**
+ * 
+ * @param nodeToBeEvaluated
+ * @param b
+ * @return node closest to the evaluated node, or null if no.
+ * 
+ * Finds the node closest to this node to a certain box.
+ */
+private void connectTwoBoxes(Box b1, Box b2) {
+	List<Node> nodesConnectedToBox1 = boxNodes.get(b1);
+	List<Node> nodesConnectedToBox2 = boxNodes.get(b2);
+ 	if(nodesConnectedToBox1 == null || nodesConnectedToBox2 == null ) {
+		return;
+	}
+ 	Node bestNode1 = null;
+	Node bestNode2 = null;
+	double distanceBetweenNode = 100;
+	
+	for(int i = 0; i < nodesConnectedToBox1.size(); i++) {
+		for(int j = 0; j < nodesConnectedToBox2.size(); j++) {
+			Node currentNode1 = nodesConnectedToBox1.get(i);
+			Node currentNode2 = nodesConnectedToBox2.get(j);
+			double currentDistance = currentNode1.calculateDistance(currentNode2);
+			if(currentDistance < distanceBetweenNode) {
+				distanceBetweenNode = currentDistance;
+				bestNode1 = currentNode1;
+				bestNode2 = currentNode2;
+			}
+		}
+		
+	}
+	
+	List<Box> boxes1 = boxConnectedBox.get(b1);
+	List<Box> boxes2 = boxConnectedBox.get(b2);
+	
+	boxes1.add(b2);
+	boxes2.add(b1);
+	
+	if(bestNode1.getPos().getX() == bestNode2.getPos().getX() || bestNode1.getPos().getY() == bestNode2.getPos().getY()) {
+		if(isCollisionFreeEdge(bestNode1, bestNode2)) {
+			bestNode1.addEdge(bestNode2);
+			bestNode2.addEdge(bestNode1);
+			boxConnectedBox.put(b1, boxes1);
+			boxConnectedBox.put(b2, boxes2);
+		}
+	} else {
+		if(connectViaHelpNode(bestNode1, bestNode2)) {
+			boxConnectedBox.put(b1, boxes1);
+			boxConnectedBox.put(b2, boxes2);
+		}
+		return;
+	}
+	
+}
+
+private boolean connectViaHelpNode(Node bestNode1, Node bestNode2) {
+	
+	Point2D helpPoint = new Point2D.Double(bestNode1.getPos().getX(), bestNode2.getPos().getY());
+	if(!isCollisionFreePoint(helpPoint)) {
+		helpPoint.setLocation(bestNode2.getPos().getX(), bestNode1.getPos().getY());
+		if(!isCollisionFreePoint(helpPoint)) {
+			return false;
+		}
+	}
+
+	Node helpNode = new HelpNode(helpPoint);
+	
+	if(isCollisionFreeEdge(bestNode1, helpNode) && isCollisionFreeEdge(helpNode, bestNode2)) {
+		nodes.add(helpNode);
+		bestNode1.addEdge(helpNode);
+		helpNode.addEdge(bestNode1);
+		bestNode2.addEdge(helpNode);
+		helpNode.addEdge(bestNode2);
+		return true;
+	}
+	return false;	
+}
+
 
 public HashMap<Box, List<Node>> getBoxNodes() {
 	return boxNodes;
@@ -670,7 +793,11 @@ public HashMap<StaticObstacle, List<Node>> getStaticObstacleNodes() {
 	 * 	
 	 * 	An edge is represented within a node with an edgeNodes list.
 	 * 	Connect all nodes connected to the same box if collision free path.
-	 * 	Create help nodes that serve to maintain left-right-up-down constraint, discard if in collision
+	 * 
+	 * 	Strategy for creating edges between boxes:
+	 * 		For each node connected to each box, create an edge to the closest node of every box/obstacle that is not a part of the same obstacle. Do this for all obstacles.
+	 * 		Create help nodes that serve to maintain left-right-up-down constraint, discard if in collision (but should not be if we´re thinking right)
+	 * 		
 	 * 	
 	 * 
 	 * 		
