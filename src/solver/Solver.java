@@ -47,7 +47,11 @@ public void initiateHashMaps() {
 	for(Box b : ps.getMovingBoxes()) {
 		boxConnectedBox.put(b, new ArrayList<>());
 	}
-	//DoSame for staticObstacles
+	
+	for(StaticObstacle so : ps.getStaticObstacles()) {
+		staticConnectedStatic.put(so, new ArrayList<>());
+		staticConnectedBox.put(so, new ArrayList<>());
+	}
 }
 
 
@@ -662,14 +666,26 @@ public void createEdgesBetweenAllBoxes() {
 			}
 		}
 	}
-	
-	
-	
 }
 
 
 
 private void connectTwoStaticObstacles(StaticObstacle so1, StaticObstacle so2) {
+	
+	List<Node> nodesConnectedToSO1 = staticObstacleNodes.get(so1);
+	List<Node> nodesConnectedToSO2 = staticObstacleNodes.get(so2);
+	
+	if(nodesConnectedToSO1 == null || nodesConnectedToSO2 == null) {
+		
+		
+		
+		
+		
+		
+	}
+	
+	
+	
 	
 }
 
