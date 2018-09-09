@@ -52,6 +52,9 @@ public void initiateHashMaps() {
 		staticConnectedStatic.put(so, new ArrayList<>());
 		staticConnectedBox.put(so, new ArrayList<>());
 	}
+	for(Box b : ps.getMovingObstacles()) {
+		boxConnectedBox.put(b, new ArrayList<>());
+	}
 }
 
 
@@ -331,6 +334,13 @@ public Point2D getCenter(Box b) {
 	//x = Double.parseDouble(xValueString);
 	//y = Double.parseDouble(yValueString);
 	
+	Point2D p = new Point2D.Double(x, y);
+	return p;
+}
+
+public Point2D getCenter(Point2D LowerLeftPoint) {
+	Double x = doubleFormatter(LowerLeftPoint.getX() + (width/2));
+	Double y = doubleFormatter(LowerLeftPoint.getY() + (width/2));
 	Point2D p = new Point2D.Double(x, y);
 	return p;
 }
@@ -662,7 +672,37 @@ public void createEdgesBetweenAllBoxes() {
 			if(i == j || boxConnectedBox.get(ps.getMovingBoxes().get(i)).contains(ps.getMovingBoxes().get(j))) {
 				continue;
 			} else {
-				connectTwoBoxes(ps.getMovingBoxes().get(i), ps.getMovingBoxes().get(j));
+				connectTwoBoxes(ps.getMovingBoxes().get(i), ps.getMovingBoxes().get(j)); //connecting Moving Boxes to Moving Boxes
+			}
+		}
+		for(int j = 0; j < ps.getMovingObstacles().size(); j++) {
+			connectTwoBoxes(ps.getMovingBoxes().get(i), ps.getMovingObstacles().get(j)); //connecting Moving Boxes to Moving Obstacles
+			
+		}
+		for(int j = 0; j < ps.getStaticObstacles().size(); j++) {
+			connectBoxStaticObstacle(ps.getStaticObstacles().get(j), ps.getMovingBoxes().get(i)); //connecting Moving Boxes to Static Obstacles
+		}
+	}
+	
+	for(int i = 0; i < ps.getMovingObstacles().size(); i++) {
+		for(int j = 1; j < ps.getMovingObstacles().size(); j++) {
+			if(i == j || boxConnectedBox.get(ps.getMovingObstacles().get(i)).contains(ps.getMovingObstacles().get(j))) {
+				continue;
+			} else {
+				connectTwoBoxes(ps.getMovingObstacles().get(i), ps.getMovingObstacles().get(j));	//connecting Moving obstacles to Moving obstacles
+			}
+		}
+		for(int j = 0; j < ps.getStaticObstacles().size(); j++) {
+			connectBoxStaticObstacle(ps.getStaticObstacles().get(j), ps.getMovingObstacles().get(i)); //connecting Moving obstacles to static obstacles
+		}
+	}
+	
+	for(int i = 0; i < ps.getStaticObstacles().size(); i++) {
+		for(int j = 1; j < ps.getStaticObstacles().size(); j++) {
+			if(i == j || staticConnectedStatic.get(ps.getStaticObstacles().get(i)).contains(ps.getStaticObstacles().get(j))) {
+				continue;
+			} else {
+				connectTwoStaticObstacles(ps.getStaticObstacles().get(i), ps.getStaticObstacles().get(j)); //connecting static obstacles to static obstacles
 			}
 		}
 	}
@@ -676,13 +716,47 @@ private void connectTwoStaticObstacles(StaticObstacle so1, StaticObstacle so2) {
 	List<Node> nodesConnectedToSO2 = staticObstacleNodes.get(so2);
 	
 	if(nodesConnectedToSO1 == null || nodesConnectedToSO2 == null) {
-		
-		
-		
-		
-		
-		
+		return;
 	}
+	
+	Node bestNode1 = null;
+	Node bestNode2 = null;
+	double distanceBetweenNode = 100;
+	
+	for(int i = 0; i < nodesConnectedToSO1.size(); i++) {
+		for(int j = 0; j < nodesConnectedToSO2.size(); j++) {
+			Node currentNode1 = nodesConnectedToSO1.get(i);
+			Node currentNode2 = nodesConnectedToSO2.get(j);
+			double currentDistance = currentNode1.calculateDistance(currentNode2);
+			if(currentDistance < distanceBetweenNode) {
+				distanceBetweenNode = currentDistance;
+				bestNode1 = currentNode1;
+				bestNode2 = currentNode2;
+			}
+		}
+	}
+	
+	List<StaticObstacle> boxes1 = staticConnectedStatic.get(so1);
+	List<StaticObstacle> boxes2 = staticConnectedStatic.get(so2);
+	
+	boxes1.add(so2);
+	boxes2.add(so1);
+	
+	if(bestNode1.getPos().getX() == bestNode2.getPos().getX() || bestNode1.getPos().getY() == bestNode2.getPos().getY()) {
+		if(isCollisionFreeEdge(bestNode1, bestNode2)) {
+			bestNode1.addEdge(bestNode2);
+			bestNode2.addEdge(bestNode1);
+			staticConnectedStatic.put(so1, boxes1);
+			staticConnectedStatic.put(so2, boxes2);
+		}
+	} else {
+		if(connectViaHelpNode(bestNode1, bestNode2)) {
+			staticConnectedStatic.put(so1, boxes1);
+			staticConnectedStatic.put(so2, boxes2);
+		}
+		return;
+	}
+	
 	
 	
 	
@@ -691,6 +765,46 @@ private void connectTwoStaticObstacles(StaticObstacle so1, StaticObstacle so2) {
 
 private void connectBoxStaticObstacle(StaticObstacle so, Box b) {
 	
+	List<Node> nodesConnectedToSO = staticObstacleNodes.get(so);
+	List<Node> nodesConnectedToBox = boxNodes.get(b);
+	
+	if(nodesConnectedToSO == null || nodesConnectedToBox == null) {
+		return;
+	}
+	
+	Node bestNode1 = null;
+	Node bestNode2 = null;
+	double distanceBetweenNode = 100;
+	
+	for(int i = 0; i < nodesConnectedToSO.size(); i++) {
+		for(int j = 0; j < nodesConnectedToBox.size(); j++) {
+			Node currentNode1 = nodesConnectedToSO.get(i);
+			Node currentNode2 = nodesConnectedToBox.get(j);
+			double currentDistance = currentNode1.calculateDistance(currentNode2);
+			if(currentDistance < distanceBetweenNode) {
+				distanceBetweenNode = currentDistance;
+				bestNode1 = currentNode1;
+				bestNode2 = currentNode2;
+			}
+		}
+	}
+	
+	List<Box> boxes = staticConnectedBox.get(so);
+	
+	boxes.add(b);
+	
+	if(bestNode1.getPos().getX() == bestNode2.getPos().getX() || bestNode1.getPos().getY() == bestNode2.getPos().getY()) {
+		if(isCollisionFreeEdge(bestNode1, bestNode2)) {
+			bestNode1.addEdge(bestNode2);
+			bestNode2.addEdge(bestNode1);
+			staticConnectedBox.put(so, boxes);
+		}
+	} else {
+		if(connectViaHelpNode(bestNode1, bestNode2)) {
+			staticConnectedBox.put(so, boxes);
+		}
+		return;
+	}
 }
 
 
@@ -772,6 +886,72 @@ private boolean connectViaHelpNode(Node bestNode1, Node bestNode2) {
 		return true;
 	}
 	return false;	
+}
+
+
+private void connectBoxToGoal(MovingBox movingBox) {	
+	int index = ps.getMovingBoxes().indexOf(movingBox);
+	Point2D center = getCenter(ps.getMovingBoxEndPositions().get(index));
+	GoalNode goalNode = new GoalNode(center);
+	nodes.add(goalNode);
+	movingBox.setGoalNode(goalNode);
+	goalNode.setGoalBox(movingBox);
+}
+
+
+
+private Node createStartBoxNode(MovingBox b) {
+	
+	Point2D centerPoint = new Point2D.Double(b.getRect().getCenterX(), b.getRect().getCenterY());
+	Node centerNode = new StartBoxNode(centerPoint);
+	nodes.add(centerNode);
+	b.setStartNode(centerNode);
+	return centerNode;
+}
+
+private void connectGoalNode(Box b) {
+	
+	MovingBox movingBox = (MovingBox) b;
+	Node goalNode = movingBox.getGoalNode();
+	Node closestNode = null;
+	double distance = 100;
+	
+	for(Node n : nodes) {
+		if(n.equals(goalNode)) {
+			continue;
+		}
+		double currentDistance = n.calculateDistance(goalNode);
+		if(currentDistance < distance) {
+			distance = currentDistance;
+			closestNode = n;
+		}
+	}
+	connectViaHelpNode(goalNode, closestNode);
+}
+
+private void connectStartBoxNode(MovingBox startBox) {
+	
+	Node connectNode = boxNodes.get(startBox).get(0);
+	Node startNode = createStartBoxNode(startBox);
+	Point2D helpPoint = new Point2D.Double(startNode.getPos().getX(), connectNode.getPos().getY());
+	Node helpNode = new HelpNode(helpPoint);
+	nodes.add(helpNode);
+	startNode.addEdge(helpNode);
+	helpNode.addEdge(startNode);
+	connectNode.addEdge(helpNode);
+	helpNode.addEdge(connectNode);
+}
+
+public void initiate() {
+	makeInitialSampling();
+    makeInitialEdges();
+    createEdgesBetweenAllBoxes();
+    MovingBox mb = (MovingBox) ps.getMovingBoxes().get(0);
+    connectBoxToGoal(mb);
+    connectGoalNode(mb);
+    connectStartBoxNode(mb);
+    
+    
 }
 
 

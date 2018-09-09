@@ -3,23 +3,28 @@ package problem;
 import java.io.IOException;
 import java.util.List;
 
+import solver.GoalNode;
 import solver.HelpNode;
 import solver.Node;
 import solver.Solver;
+import solver.StartBoxNode;
 
 public class Main {
 	
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input3.txt");
+            ps.loadProblem("inputExample.txt");
             Solver solver = new Solver(ps);
-            solver.makeInitialSampling();
-            solver.makeInitialEdges();
-            solver.createEdgesBetweenAllBoxes();
+            solver.initiate();
             List<Node> nodes = solver.getAllNodes();
             for(Node n : nodes) {
-            	System.out.println("Node " + n + " has edges " + n.getEdges());
+            	if(n instanceof StartBoxNode) {
+            		System.out.println("StartNode " + n + " has edges " + n.getEdges());
+            	}
+            	if(n instanceof GoalNode) {
+            		System.out.println("GoalNode " + n + " has edges " + n.getEdges());
+            	}
             }
             ps.loadSolution("output3.txt");
         } catch (IOException e) {
