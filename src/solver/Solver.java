@@ -427,8 +427,8 @@ public void deleteBoxSampling(Box b) {
 		List<Node> edges = n.getEdges();
 		for(int j = 0; j < edges.size(); j++) {
 			Node m = edges.get(j);
-			//n.removeEdge(m);
-			//m.removeEdge(n);
+			n.removeEdge(m);
+			m.removeEdge(n);
 		}
 	}
 	boxNodes.remove(b);

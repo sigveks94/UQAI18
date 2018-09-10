@@ -65,6 +65,11 @@ public void addEdge(Node node) {
 	edgeNodes.add(node);
 }
 
+public void removeEdge(Node node) {
+	int index = edgeNodes.indexOf(node);
+	edgeNodes.remove(index);
+}
+
 public ArrayList<Node> getEdges(){
 	return edgeNodes;
 }
