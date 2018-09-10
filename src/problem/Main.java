@@ -14,18 +14,12 @@ public class Main {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("inputExample.txt");
+            ps.loadProblem("input3.txt");
             Solver solver = new Solver(ps);
+            double startTime = System.nanoTime();
             solver.initiate();
-            List<Node> nodes = solver.getAllNodes();
-            for(Node n : nodes) {
-            	if(n instanceof StartBoxNode) {
-            		System.out.println("StartNode " + n + " has edges " + n.getEdges());
-            	}
-            	if(n instanceof GoalNode) {
-            		System.out.println("GoalNode " + n + " has edges " + n.getEdges());
-            	}
-            }
+            double elapsedTime = System.nanoTime() - startTime;
+            System.out.println("Elapsed time: " + elapsedTime/1000000 + " ms");
             ps.loadSolution("output3.txt");
         } catch (IOException e) {
             System.out.println("IO Exception occured");

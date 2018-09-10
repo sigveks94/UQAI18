@@ -44,9 +44,12 @@ public class Solver {
 	}
 
 	public List<Node> makePath(Node start, Node goal) {
-		start.setParent(null);
 		AStar astar = new AStar();
+		start.setParent(null);
+		start.setG(0);
+		start.setH(start.calculateDistance(goal));
 		astar.setInitialQueue(start);
+		astar.addToVisited(start);
 		astar.setEnd(goal);
 		astar.find();
 		List<Node> path = astar.getPath();
@@ -470,7 +473,7 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 	
 	double distance = doubleFormatter(from.calculateDistance(to));
 	
-	int discretizations = (int) Math.ceil(distance/width);
+	int discretizations = (int) Math.ceil(distance/width) - 2;
 	
 	if(from.getPos().getX() == to.getPos().getX()) {
 		if(from.getPos().getY() > to.getPos().getY()) {
@@ -493,7 +496,7 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
 	
 	if(from.getPos().getY() == to.getPos().getY()) {
 		if(from.getPos().getX() > to.getPos().getX()) {
-			for(int i = 1 ; i < discretizations ; i++) {
+			for(int i = 1 ; i <= discretizations ; i++) {
 				Point2D centerFakeBox = new Point2D.Double(doubleFormatter(from.getPos().getX() - (i*width)), doubleFormatter(from.getPos().getY()));
 				//System.out.println(centerFakeBox);
 				if(!isCollisionFreePoint(centerFakeBox)) {
@@ -1083,6 +1086,9 @@ public void initiate() {
     connectBoxToGoal(mb);
     connectGoalNode(mb);
     connectStartBoxNode(mb);
+    Node startNode = mb.getStartNode();
+    Node goalNode = mb.getGoalNode();
+    System.out.println(makePath(startNode, goalNode));
     
     
 }

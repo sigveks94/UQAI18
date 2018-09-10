@@ -13,9 +13,9 @@ public class AStar {
 
 private boolean finished;
 private Queue<Node> queue;
-private Node endNode;
+private Node endNode = null;
 private List<Node> path;
-private Node end;
+private Node end = null;
 private HashMap<Point2D, Node> visited;
 
 public Node getEndNode() {
@@ -50,38 +50,39 @@ public AStar(){
 	visited = new HashMap<Point2D, Node>();
 }
 
-
-public void addNodeToQueue(Node node) {
-	if (visited.containsKey(node.getPos())) {
-		if(visited.get(node.getPos()).getG() > node.getG()) {
-			visited.get(node.getPos()).setG(node.getG());
-			visited.get(node.getPos()).setParent(node.getParent());
+public void generateNeighbours(Node node) {
+	for (Node neighbor: node.getEdges()) {
+		double cost = node.getG() + neighbor.calculateDistance(node);
+		if(visited.containsKey(neighbor.getPos())) {
+			if(visited.get(neighbor.getPos()).getG() > cost) {
+				neighbor.setG(cost);
+				neighbor.setParent(node);
+			}
 		}
-	}
-	else {
-		queue.add(node);
-		visited.put(node.getPos(), node);
-		if (node.getPos().equals(end.getPos())) {
-			finished=true;
-			endNode = node;
-			path = getPath(endNode);
+		else {
+			if(neighbor.getPos().equals(end.getPos())) {
+				finished = true;
+				neighbor.setParent(node);
+				endNode = neighbor;
+				path = getPath(endNode);
+				return;
+			}
+			neighbor.setParent(node);
+			neighbor.setG(cost);
+			neighbor.setH(this.h(neighbor));
+			visited.put(neighbor.getPos(), neighbor);
+			queue.add(neighbor);
 		}
 	}
 }
 
-public void generateNeighbours(Node node) {
-	
-	for (Node neighbor: node.getEdges()) {
-		neighbor.setParent(node);
-		neighbor.setG(this.g(neighbor));
-		neighbor.setH(this.h(neighbor));
-		addNodeToQueue(neighbor);
-	}
-	queue.remove(node);
+
+public void addToVisited(Node node) {
+	visited.put(node.getPos(), node);
 }
 
 public double h(Node node){
-	return node.calculateDistance(endNode);
+	return node.calculateDistance(end);
 }
 
 public double g(Node node) {
@@ -95,7 +96,7 @@ public void find() {
 	while (!(finished) && !(queue.isEmpty())) {
 		generateNeighbours(queue.poll());
 		o++;
-		if (o>5000000) {
+		if (o>5000) {
 			System.out.println("over 50000");
 					this.finished=true;
 				}

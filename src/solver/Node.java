@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import problem.Box;
 
-public abstract class Node {
+public abstract class Node implements Comparable<Node> {
 	
 private Point2D pos;
 private Node parent;
