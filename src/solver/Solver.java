@@ -317,9 +317,8 @@ public boolean isInsideBoard(Point2D point) {
 /**
  * 
  * @param b
- * @return
+ * @return center value of box B.
  * 
- * Returns the center value of box B.
  * 
  */
 
@@ -338,6 +337,12 @@ public Point2D getCenter(Box b) {
 	return p;
 }
 
+
+/**
+ * 
+ * @param LowerLeftPoint
+ * @return center value of Point2D
+ */
 public Point2D getCenter(Point2D LowerLeftPoint) {
 	Double x = doubleFormatter(LowerLeftPoint.getX() + (width/2));
 	Double y = doubleFormatter(LowerLeftPoint.getY() + (width/2));
@@ -395,7 +400,7 @@ public boolean isCollisionFreePoint(Point2D point) {
  * 
  */
 
-// IMPLEMENT LOGIC TO ALSO REMOVE EDGES.
+
 public void deleteBoxSampling(Box b) {
 	
 	List<Node> nodesConnectedToBox = new ArrayList<>();
@@ -404,9 +409,17 @@ public void deleteBoxSampling(Box b) {
 	for(Node n : nodesConnectedToBox) {
 		nodes.remove(n);
 	}
-	boxNodes.remove(b);
 	
-
+	for(int i = 0; i < nodesConnectedToBox.size(); i++) {
+		Node n = nodesConnectedToBox.get(i);
+		List<Node> edges = n.getEdges();
+		for(int j = 0; j < edges.size(); j++) {
+			Node m = edges.get(j);
+			//n.removeEdge(m);
+			//m.removeEdge(n);
+		}
+	}
+	boxNodes.remove(b);
 }
 
 /**
@@ -494,7 +507,6 @@ public boolean isCollisionFreeEdge(Node from, Node to) {
  * 
  * Retrieves the list of nodes connected to the box.
  * Identifies which nodes are present.
- * Again:
  * 
  * Node1 = bottom left node
  * Node2 = bottom right node
@@ -575,6 +587,23 @@ public void createBoxEdges(Box b){
 	}
 	
 }
+
+/**
+ * 
+ * @param b
+ * 
+ * Retrieves the list of nodes connected to the static obstacle.
+ * Identifies which nodes are present.
+ * 
+ * Node1 = bottom left node
+ * Node2 = bottom right node
+ * Node3 = top left node
+ * Node4 = top right node
+ * 
+ * 
+ * Checks whether the edges between the nodes are collision free, and if so stores the nodes in each others edgeList.
+ */
+
 
 public void createStaticObstacleEdges(StaticObstacle so){
 	
@@ -660,9 +689,20 @@ public void makeInitialEdges() {
 	}
 }
 
+/**
+ * 
+ * @return list of all nodes
+ */
 public List<Node> getAllNodes(){
 	return nodes;
 }
+
+
+/**
+ * Iterates through every combination of Moving Box - Moving Box, Moving Box - Moving Obstacle, Moving Box - Static Obstacle
+ * Moving Obstacle - Moving Obstacle, Moving Obstacle - Static Obstacle and Static Obstacle - Static Obstacle to connect
+ * free-path edges between all combinations.
+ */
 
 //SuperMethod 
 public void createEdgesBetweenAllBoxes() {
@@ -708,6 +748,16 @@ public void createEdgesBetweenAllBoxes() {
 	}
 }
 
+/**
+ * 
+ * @param StaticObstacle 1
+ * @param StaticObstacle 2
+ * 
+ * Retrieves the nodes connected to each SO. If either of them are null, there are no possible edges.
+ * Finds the best pair of nodes to connect (best meaning the shortest distance).
+ * Connects this pair of nodes via a help-node if collision-free path.
+ * 
+ */
 
 
 private void connectTwoStaticObstacles(StaticObstacle so1, StaticObstacle so2) {
@@ -763,6 +813,18 @@ private void connectTwoStaticObstacles(StaticObstacle so1, StaticObstacle so2) {
 	
 }
 
+/**
+ * 
+ * @param StaticObstacle
+ * @param Box
+ * 
+ * Retrieves the nodes connected to SO and to box. If either of them are null, there are no possible edges.
+ * Finds the best pair of nodes to connect (best meaning the shortest distance).
+ * Connects this pair of nodes via a help-node if collision-free path.
+ * 
+ */
+
+
 private void connectBoxStaticObstacle(StaticObstacle so, Box b) {
 	
 	List<Node> nodesConnectedToSO = staticObstacleNodes.get(so);
@@ -812,12 +874,15 @@ private void connectBoxStaticObstacle(StaticObstacle so, Box b) {
 
 /**
  * 
- * @param nodeToBeEvaluated
- * @param b
- * @return node closest to the evaluated node, or null if no.
+ * @param Box 1
+ * @param Box 2
  * 
- * Finds the node closest to this node to a certain box.
+ * Retrieves the nodes connected to each box. If either of them are null, there are no possible edges.
+ * Finds the best pair of nodes to connect (best meaning the shortest distance).
+ * Connects this pair of nodes via a help-node if collision-free path.
+ * 
  */
+
 private void connectTwoBoxes(Box b1, Box b2) {
 	List<Node> nodesConnectedToBox1 = boxNodes.get(b1);
 	List<Node> nodesConnectedToBox2 = boxNodes.get(b2);
@@ -865,6 +930,23 @@ private void connectTwoBoxes(Box b1, Box b2) {
 	
 }
 
+/**
+ * 
+ * @param bestNode1
+ * @param bestNode2
+ * @return true if successfully made an edge, otherwise false
+ * 
+ * 
+ * Figures out the position of the helpPoint. First takes the X-value of first parameter and Y-value of second parameter.
+ * If that is a collisionPoint --> switch to opposite helpPoint. If this is also in collision, return.
+ * 
+ * Create a helpNode at the helpPoint.
+ * 
+ * If both the path from node1 to helpNode AND the path from helpNode to node2, then add the helpNode to nodes and create the edges.
+ * 
+ * 
+ */
+
 private boolean connectViaHelpNode(Node bestNode1, Node bestNode2) {
 	
 	Point2D helpPoint = new Point2D.Double(bestNode1.getPos().getX(), bestNode2.getPos().getY());
@@ -889,6 +971,19 @@ private boolean connectViaHelpNode(Node bestNode1, Node bestNode2) {
 }
 
 
+/**
+ * 
+ * @param movingBox
+ * 
+ * Figures out which index the movingBox has in the list of movingBoxes from ProblemSpec.
+ * Creates a Point2D at the center of the goalPosition to this movingBox.
+ * Creates a GoalNode of the goalPoint.
+ * Sets the goalNode of this box to goalNode.
+ * Sets the belonging box of this goalNode to this box.
+ * 
+ * 
+ */
+
 private void connectBoxToGoal(MovingBox movingBox) {	
 	int index = ps.getMovingBoxes().indexOf(movingBox);
 	Point2D center = getCenter(ps.getMovingBoxEndPositions().get(index));
@@ -898,7 +993,13 @@ private void connectBoxToGoal(MovingBox movingBox) {
 	goalNode.setGoalBox(movingBox);
 }
 
-
+/**
+ * 
+ * @param movingBox
+ * @return the Node created
+ * 
+ * Creates a node at the center of the MovingBox, making this the start node for the movingBox.
+ */
 
 private Node createStartBoxNode(MovingBox b) {
 	
@@ -908,6 +1009,15 @@ private Node createStartBoxNode(MovingBox b) {
 	b.setStartNode(centerNode);
 	return centerNode;
 }
+
+
+/**
+ * 
+ * @param box
+ * 
+ * connects the goalNode of the box to the rest of the path-tree via the node in the path-tree that is closest to the goalNode via a helpNode.
+ * 
+ */
 
 private void connectGoalNode(Box b) {
 	
@@ -929,6 +1039,13 @@ private void connectGoalNode(Box b) {
 	connectViaHelpNode(goalNode, closestNode);
 }
 
+/**
+ * 
+ * @param startBox
+ * 
+ * Connects the startNode of the box to one of the nodes around this box. Creates vertical and horizontal edge.
+ */
+
 private void connectStartBoxNode(MovingBox startBox) {
 	
 	Node connectNode = boxNodes.get(startBox).get(0);
@@ -942,6 +1059,10 @@ private void connectStartBoxNode(MovingBox startBox) {
 	helpNode.addEdge(connectNode);
 }
 
+/**
+ * Main method to make all operations in correct order.
+ */
+
 public void initiate() {
 	makeInitialSampling();
     makeInitialEdges();
@@ -954,12 +1075,18 @@ public void initiate() {
     
 }
 
-
+/**
+ * 
+ * @return hashMap of nodes connected to boxes
+ */
 public HashMap<Box, List<Node>> getBoxNodes() {
 	return boxNodes;
 }
 
-
+/**
+ * 
+ * @return hashMap of nodes connected to staticObstacles
+ */
 public HashMap<StaticObstacle, List<Node>> getStaticObstacleNodes() {
 	return staticObstacleNodes;
 }
