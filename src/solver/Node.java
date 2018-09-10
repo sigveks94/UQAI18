@@ -8,6 +8,9 @@ import problem.Box;
 public abstract class Node {
 	
 private Point2D pos;
+private Node parent;
+private double g;
+private double h;
 
 private ArrayList<Node> edgeNodes = new ArrayList<>();
 
@@ -15,6 +18,40 @@ private ArrayList<Node> edgeNodes = new ArrayList<>();
 
 public Node(Point2D pos) {
 	this.pos = (Point2D) pos;
+}
+
+public Node getParent() {
+	return parent;
+}
+public void setParent(Node parent) {
+	this.parent = parent;
+}
+
+public double getG() {
+	return g;
+}
+
+public void setG(double cost) {
+	this.g=cost;
+}
+
+public double getH() {
+	return h;
+}
+
+public void setH (double h) {
+	this.h=h;
+}
+
+public double getF() {
+	return  h+g;
+}
+
+public int compareTo(Node otherNode){
+	Double i = this.getF();
+	Double o = otherNode.getF();
+	
+	return i.compareTo(o);
 }
 
 public Point2D getPos() {
