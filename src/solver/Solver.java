@@ -6,6 +6,7 @@ import java.awt.geom.Rectangle2D;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,7 +42,18 @@ public class Solver {
 		boxConnectedBox = new HashMap<>();
 		initiateHashMaps();
 	}
-	
+
+	public List<Node> makePath(Node start, Node goal) {
+		start.setParent(null);
+		AStar astar = new AStar();
+		astar.setInitialQueue(start);
+		astar.setEnd(goal);
+		astar.find();
+		List<Node> path = astar.getPath();
+		Collections.reverse(path);
+		return path;
+		
+	}
 	
 public void initiateHashMaps() {
 	for(Box b : ps.getMovingBoxes()) {
