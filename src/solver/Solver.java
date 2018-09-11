@@ -1088,7 +1088,9 @@ public void initiate() {
     connectStartBoxNode(mb);
     Node startNode = mb.getStartNode();
     Node goalNode = mb.getGoalNode();
-    System.out.println(makePath(startNode, goalNode));
+    List<Node> path = makePath(startNode, goalNode);
+    PathBuilder pb = new PathBuilder(path);
+    System.out.println(pb.createAllSteps());
     
     
 }
