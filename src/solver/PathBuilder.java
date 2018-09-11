@@ -4,20 +4,61 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import problem.RobotConfig;
+
 public class PathBuilder {
 	
-	private String path = "";
 	
+	private List<Point2D> outPutRobotPath;
+	private List<Point2D> outPutBoxPath;
+	private List<Node> inputRobotPath;
+	private List<Node> inputBoxPath;
+	
+	//private List<List<String>> completePath = "";
+	//private String subPath = "";
+	
+	private String path;
 	private List<Node> nodePath;
 	
 	private final double validStepLength = 0.001;
 	
-	public PathBuilder(List<Node> path) {
-		nodePath = path;
+	
+	/**
+	 * 
+	 * @param path
+	 * 
+	 * The constructor takes in a path that consists of a list of nodes.
+	 * 
+	 */
+	public PathBuilder(List<Node> robotPath, List<Node> boxPath) {
+		this.inputRobotPath=robotPath;
+		this.inputBoxPath=boxPath;
 	}
 	
-	private int calculateNumberOfSteps(Node from, Node to) {
-		double distance = from.calculateDistance(to);
+	private String translatePointToString(Point2D point) {
+		String returnString =  point.getX() + " " + point.getY();
+		return returnString;	
+	}
+	
+	private void translatePathToString(List<Point2D> points) {
+		
+		for(Point2D point : points) {
+			if(point.equals(points.get(points.size()-1))) {
+				path += this.translatePointToString(point);
+			}
+			else {
+				path += this.translatePointToString(point) + "\n";
+			}
+		}
+	}
+	
+	public String getCompletePath() {
+		translatePathToString(createAllSteps());
+		return path;
+	}
+	
+	private int calculateNumberOfSteps(Point2D from, Point2D to) {
+		double distance = from.distance(to);
 		int numberOfSteps = (int) Math.floor(distance/validStepLength);
 		return numberOfSteps;
 	}
@@ -27,15 +68,15 @@ public class PathBuilder {
 	//Left = 3
 	//Down = 4
 	
-	private int returnDirection(Node from, Node to) {
+	private int returnDirection(Point2D from, Point2D to) {
 		
-		if(from.getPos().getX() < to.getPos().getX()) {
+		if(from.getX() < to.getX()) {
 			return 1;
 		}
-		if(from.getPos().getX() > to.getPos().getX()) {
+		if(from.getX() > to.getX()) {
 			return 3;
 		}
-		if(from.getPos().getY() > to.getPos().getY()) {
+		if(from.getY() > to.getY()) {
 			return 4;
 		}
 		else {
@@ -55,12 +96,66 @@ public class PathBuilder {
 		return finalPath;
 	}
 	
-	private List<Point2D> returnSteps(Node from, Node to){
+	private List<Point2D> returnSteps(Point2D from, Point2D to){
 		
 		List<Point2D> currentPath = new ArrayList<>();
 		
 		int numberOfSteps = calculateNumberOfSteps(from,to);
 		int direction = returnDirection(from, to);
+		
+		Point2D fromPoint = from;
+		currentPath.add(fromPoint);
+		
+		//Move right
+		if(direction == 1) {
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX() + i * validStepLength , fromPoint.getY());
+				currentPath.add(temporaryPoint);	
+			}
+			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
+				currentPath.add(to);
+			}
+		}
+		//MoveUp
+		if(direction == 2) {
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY() + i * validStepLength);
+				currentPath.add(temporaryPoint);	
+			}
+			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
+				currentPath.add(to);
+			}
+		}
+		//MoveLeft
+		if(direction == 3) {
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX() - i * validStepLength, fromPoint.getY());
+				currentPath.add(temporaryPoint);	
+			}
+			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
+				currentPath.add(to);
+			}
+		}
+		//MoveDown
+		if(direction == 4) {
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY() - i * validStepLength);
+				currentPath.add(temporaryPoint);	
+			}
+			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
+				currentPath.add(to);
+			}
+		}
+		
+		return currentPath;
+	}
+	
+	private List<Point2D> returnSteps(Node from, Node to){
+		
+		List<Point2D> currentPath = new ArrayList<>();
+		
+		int numberOfSteps = calculateNumberOfSteps(from.getPos(),to.getPos());
+		int direction = returnDirection(from.getPos(), to.getPos());
 		
 		Point2D fromPoint = from.getPos();
 		currentPath.add(fromPoint);

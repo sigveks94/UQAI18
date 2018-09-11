@@ -1019,8 +1019,9 @@ private void connectBoxToGoal(MovingBox movingBox) {
 private Node createStartBoxNode(MovingBox b) {
 	
 	Point2D centerPoint = new Point2D.Double(b.getRect().getCenterX(), b.getRect().getCenterY());
-	Node centerNode = new StartBoxNode(centerPoint);
+	StartBoxNode centerNode = new StartBoxNode(centerPoint);
 	nodes.add(centerNode);
+	centerNode.setStartBox(b);
 	b.setStartNode(centerNode);
 	return centerNode;
 }
@@ -1062,7 +1063,6 @@ private void connectGoalNode(Box b) {
  */
 
 private void connectStartBoxNode(MovingBox startBox) {
-	
 	Node connectNode = boxNodes.get(startBox).get(0);
 	Node startNode = createStartBoxNode(startBox);
 	Point2D helpPoint = new Point2D.Double(startNode.getPos().getX(), connectNode.getPos().getY());
@@ -1089,10 +1089,15 @@ public void initiate() {
     Node startNode = mb.getStartNode();
     Node goalNode = mb.getGoalNode();
     List<Node> path = makePath(startNode, goalNode);
-    PathBuilder pb = new PathBuilder(path);
-    System.out.println(pb.createAllSteps());
+    //PathBuilder pb = new PathBuilder(path);
+    //String outPutString = generateOutputMove(path, pb);
+    //System.out.println(outPutString);
     
-    
+}
+
+private Node sampleRobotNode(RobotConfig robotPosition) {
+	Node robotNode = new RobotNode(robotPosition.getPos());
+	return robotNode;
 }
 
 /**
@@ -1110,6 +1115,33 @@ public HashMap<Box, List<Node>> getBoxNodes() {
 public HashMap<StaticObstacle, List<Node>> getStaticObstacleNodes() {
 	return staticObstacleNodes;
 }
+
+////Have to consider the case where the robot should rotate. In this period the box will have to stand still.
+//private String generateOutputMove(List<Node> path, PathBuilder pb) {
+//	
+//	//StartBoxNode startBoxNode = (StartBoxNode) path.get(0);
+//	//int index = ps.getMovingBoxes().indexOf(startBoxNode.getStartBox());
+//	String robot = "0.001 0.001 0.0";
+//	String box2 = "0.2 0.8";
+//	String obst1 = "0.5 0.7";
+//	String line= "";
+//	String[] box1 = pb.getPath().split("\n");
+//	int numberOfLines = box1.length;
+//	for(int i = 0; i < numberOfLines ; i++) {
+//		if(i == numberOfLines - 1) {
+//			line += robot + " " +  box1[i] + " " + box2 + " " + obst1;
+//		}
+//		else {
+//			line += robot + " " +  box1[i] + " " + box2 + " " + obst1 + "\n";
+//		}
+//	}
+//	
+//	return line;
+//	
+	
+	
+	
+//}
 
 }
 
@@ -1156,6 +1188,8 @@ public HashMap<StaticObstacle, List<Node>> getStaticObstacleNodes() {
 	 * 
 	 * Phase3 - Path phase
 	 * 
+	 * 
+	 * Managed to find a path for movingBoxes.
 	 * 	A* search with cost to current node and simple distance to goal heuristic.
 	 * 		If no solution:
 	 * 			
@@ -1164,9 +1198,21 @@ public HashMap<StaticObstacle, List<Node>> getStaticObstacleNodes() {
 	 * 
 	 * 			If still no solution; move obstacle.
 	 * 
+	 * Have to find a path for the robot to the active movingBox.
+	 * 
+	 * 	Sample a RobotNode from initialRobotConfig
+	 * 	Connect this node to the closest node in tree via helpNode.
+	 * 	Sample a node at the center of the active movingBox in the direction the box is to be moved.
+	 * 	Use A* search with RobotNode as startNode and the newly sampled centerEdgeNode as goalNode.
 	 * 		
+	 * 		
+	 * 	
+	 * 		
+	 * 
 	 * Phase4 - Move phase 
 	 * 
+	 * 	Translate the robotPath into movingSteps for the robot.
+	 * 	
 	 * 	remember new samples of nodes connected to moved box
 	 * 	
 	 * 	
