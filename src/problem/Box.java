@@ -39,6 +39,10 @@ public abstract class Box {
 	public Box(double x, double y, double w, double h) {
 	    this.rect = new Rectangle2D.Double(Solver.doubleFormatter(x), Solver.doubleFormatter(y), Solver.doubleFormatter(w), Solver.doubleFormatter(h));
 	}
+	
+	public void setPos(Point2D point) {
+		this.pos = point;
+	}
 
 	/**
 	 * Constructs a square box at a position width a side width
