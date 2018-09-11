@@ -16,6 +16,7 @@ import problem.*;
 
 public class Solver {
 	private ProblemSpec ps;
+	private State state;
 	private List<Node> nodes;
 	private final double width;
 	private final double fakeWidth;
@@ -30,6 +31,7 @@ public class Solver {
 	
 	public Solver(ProblemSpec ps) {
 		this.ps= ps;
+		this.state = new State(this.ps);
 		nodes = new ArrayList<>();
 		halfWidth = doubleFormatter(ps.getRobotWidth()/2);
 		width = doubleFormatter(ps.getRobotWidth());
@@ -41,6 +43,10 @@ public class Solver {
 		staticConnectedBox = new HashMap<>();
 		boxConnectedBox = new HashMap<>();
 		initiateHashMaps();
+	}
+	
+	public double getWidth() {
+		return this.width;
 	}
 
 	public List<Node> makePath(Node start, Node goal) {
@@ -301,7 +307,7 @@ public Node addNode(StaticObstacle obstacle, int i) {
  * 
  */
 
-public static Double doubleFormatter(double d) {
+public static double doubleFormatter(double d) {
 	NumberFormat formatter = new DecimalFormat("#0.0000");
 	String doubleString = formatter.format(d);
 	return Double.parseDouble(doubleString);
@@ -1089,10 +1095,19 @@ public void initiate() {
     Node startNode = mb.getStartNode();
     Node goalNode = mb.getGoalNode();
     List<Node> path = makePath(startNode, goalNode);
+    
     //PathBuilder pb = new PathBuilder(path);
     //String outPutString = generateOutputMove(path, pb);
     //System.out.println(outPutString);
     
+    
+    //ONE TEMPORARY MOVE!! NEEDS AN IMPLEMENTATION FOR EACH MOVE LATER ON!!!!!
+    PathBuilder pb = new PathBuilder(this, state, null, path);
+    
+}
+
+public State getState() {
+	return this.state;
 }
 
 private Node sampleRobotNode(RobotConfig robotPosition) {
@@ -1115,6 +1130,8 @@ public HashMap<Box, List<Node>> getBoxNodes() {
 public HashMap<StaticObstacle, List<Node>> getStaticObstacleNodes() {
 	return staticObstacleNodes;
 }
+
+
 
 ////Have to consider the case where the robot should rotate. In this period the box will have to stand still.
 //private String generateOutputMove(List<Node> path, PathBuilder pb) {

@@ -1,207 +1,219 @@
 package solver;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-
+import solver.Solver;
+import problem.Box;
 import problem.RobotConfig;
 
-public class PathBuilder {
+public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF A BOX/OBSTACLE OR JUST THE ROBOTARM ITSELF - SHOULD BE INSTANTIATED NEW OBJECT FOR EVERY MOVE
 	
 	
-	private List<Point2D> outPutRobotPath;
+	private List<Point2D> outPutRobotPath; 
+	private State state;
+	private Solver solver;
 	private List<Point2D> outPutBoxPath;
-	private List<Node> inputRobotPath;
-	private List<Node> inputBoxPath;
-	
-	//private List<List<String>> completePath = "";
-	//private String subPath = "";
-	
-	private String path;
-	private List<Node> nodePath;
-	
+	private List<Node> inputRobotPath; //INPUTTED A-STARRRED PATH OF ROBOT BETWEEN ALL AVAILABLE NODES
+	private List<Node> inputBoxPath;   //INPUTTED A-STARRRED PATH OF BOX BETWEEN ALL AVAILABLE NODES
 	private final double validStepLength = 0.001;
 	
-	
-	/**
-	 * 
-	 * @param path
-	 * 
-	 * The constructor takes in a path that consists of a list of nodes.
-	 * 
-	 */
-	public PathBuilder(List<Node> robotPath, List<Node> boxPath) {
-		this.inputRobotPath=robotPath;
+	public PathBuilder(Solver solver, State state, List<Node> robotPath, List<Node> boxPath) { //if robotPath == null - that means that the box is to be moved and the robotpath must be calculated
+		this.inputRobotPath=robotPath;                             //If boxPath == null - that means that only the box is to be moved
 		this.inputBoxPath=boxPath;
+		this.solver=solver;
+		this.state=state;
 	}
 	
-	private String translatePointToString(Point2D point) {
-		String returnString =  point.getX() + " " + point.getY();
-		return returnString;	
+	
+	
+	
+	
+	// PATHBUILDER TO DO:
+	//1) FINISH GENERATEROTATION
+	//2) MAKE METHOD FOR BOX ACCOMPANIED BY ROBOT
+	//3) FINISH RETURNSTRINGBULKFROMMOVINGBOXANDROBOT AND THE OTHER LONG SHIT
+	//4) IMPLEMENT WAYS TO HANDLE THIS STRING IN SOLVER
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	public String returnStringBulkFromMovingBoxAndRobot() {
+		String lines = "";
+		// RETURN AN INTERPOLATED COMPLETE STRING CONTAINING THE PATH OF MOVING BOX AND PUSHING ROBOTARM FROM A TO B
+		return lines;
 	}
 	
-	private void translatePathToString(List<Point2D> points) {
-		
-		for(Point2D point : points) {
-			if(point.equals(points.get(points.size()-1))) {
-				path += this.translatePointToString(point);
+	public String returnStringBulkFromMovingOnlyRobot() {
+		String lines = "";
+		// RETURN AN INTERPOLATED COMPLETE STRING CONTAINING THE PATH OF MOVING ROBOT FROM A TO B
+		return lines;
+	}
+	
+	public String generateRotation(RobotConfig robot, Box b, Point2D currentPosition, Point2D nextPosition) {
+		String line = "";
+		double halfwidth = Solver.doubleFormatter(b.getWidth()/2);
+		int direction = returnDirection(currentPosition, nextPosition);
+		if (direction == 1) { // GOING EASTBOUND
+			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS ABOVE THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE ANTI-CLOCKWISE
+				double x = Solver.doubleFormatter(robot.getPos().getX());
+				double y = Solver.doubleFormatter(robot.getPos().getY() + halfwidth);
+				Point2D reversePoint = new Point2D.Double(x, y);
+				line += returnStepsRobotDirect(currentPosition, reversePoint, robot); // adds the string resulting from reversing
+				line += returnStringFromRotating90AntiClockWise(robot); //adds string from rotating
+				//The complete string resulting from this move (current -->reversePoint should be added to line
 			}
-			else {
-				path += this.translatePointToString(point) + "\n";
+			if(robot.getPos().getY() < b.getRect().getCenterY() -  0.0001) {//ROBOT IS UNDER THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE CLOCKWISE
+				double x = Solver.doubleFormatter(robot.getPos().getX());
+				double y = Solver.doubleFormatter(robot.getPos().getY() - halfwidth);
+				Point2D reversePoint = new Point2D.Double(x, y);
+				line += returnStepsRobotDirect(currentPosition, reversePoint, robot); // adds the string resulting from reversing
+				line += returnStringFromRotating90AntiClockWise(robot); //adds string from rotating
+				//The complete string resulting from this move (current -->reversePoint should be added to line
+			}
+			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
+				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
 			}
 		}
+		
+		// GOING EASTBOUND IS NOT FINISHED - IS MISSING MOVING TO LEFT AND UP/DOWN TO FINAL POSITION
+		
+		
+		//if(direction == 2)
+		
+		//if(direction == 3)
+		
+		//if(direction == 4)
+		// IMPLEMENT SITUATIONS WHERE YOU GO UP, DOWN AND LEFT - ABOVE ONLY APPLIES TO EASTBOUND MOVEMENTS
+		
+		
+		return line;
 	}
 	
-	public String getCompletePath() {
-		translatePathToString(createAllSteps());
-		return path;
+	public String returnStringFromRotating90AntiClockWise(RobotConfig robot) {
+		String line = "";
+		double currentAlpha = robot.getOrientation();
+		double alpha = calculateAlphaChange();
+		for (int i =1; i <= calculateNumberOfRotationSteps90Degrees(); i++) {
+			robot.setOrientation(currentAlpha +  alpha*i);
+			state.setRobotConfig(robot);
+			line += state.returnCompleteLineState();
+		}
+		return line;
 	}
 	
-	private int calculateNumberOfSteps(Point2D from, Point2D to) {
+	public int calculateNumberOfRotationSteps90Degrees() {
+		double width = solver.getWidth();
+		return (int) Math.ceil(width/validStepLength);
+	}
+	
+	public double calculateAlphaChange() {
+		return calculateNumberOfRotationSteps90Degrees()*Math.PI;
+	}
+	
+	public int calculateNumberOfSteps(Point2D from, Point2D to) {
 		double distance = from.distance(to);
 		int numberOfSteps = (int) Math.floor(distance/validStepLength);
 		return numberOfSteps;
 	}
 	
-	//Right = 1
-	//Up = 2
-	//Left = 3
-	//Down = 4
 	
 	private int returnDirection(Point2D from, Point2D to) {
 		
-		if(from.getX() < to.getX()) {
+		if(from.getX() < to.getX()) { 	//Right = 1
 			return 1;
 		}
-		if(from.getX() > to.getX()) {
+		if(from.getX() > to.getX()) {	//Left = 3
 			return 3;
 		}
-		if(from.getY() > to.getY()) {
+		if(from.getY() > to.getY()) {	//Down = 4
 			return 4;
 		}
-		else {
+		else {							//Up = 2
 			return 2;
 		}
 		
 	}
 	
-	public List<Point2D> createAllSteps(){
-		
-		List<Point2D> finalPath = new ArrayList<>();
-		
-		for(int i = 0; i < nodePath.size() - 1; i ++) {
-			finalPath.addAll(returnSteps(nodePath.get(i), nodePath.get(i+1)));
-		}
-		
-		return finalPath;
-	}
 	
-	private List<Point2D> returnSteps(Point2D from, Point2D to){
+	
+	private String returnStepsRobotDirect(Point2D from, Point2D to, RobotConfig robot){
 		
-		List<Point2D> currentPath = new ArrayList<>();
-		
+		List<String> currentPath = new ArrayList<>();
+		String returnString = "";
 		int numberOfSteps = calculateNumberOfSteps(from,to);
 		int direction = returnDirection(from, to);
 		
-		Point2D fromPoint = from;
-		currentPath.add(fromPoint);
-		
 		//Move right
 		if(direction == 1) {
 			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX() + i * validStepLength , fromPoint.getY());
-				currentPath.add(temporaryPoint);	
+				Point2D temporaryPoint = new Point2D.Double(from.getX() + i * validStepLength , from.getY());
+				robot.setPos(temporaryPoint);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());	
 			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
-				currentPath.add(to);
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
 			}
 		}
 		//MoveUp
 		if(direction == 2) {
 			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY() + i * validStepLength);
-				currentPath.add(temporaryPoint);	
+				Point2D temporaryPoint = new Point2D.Double(from.getX(), from.getY() + i * validStepLength);
+				robot.setPos(temporaryPoint);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());		
 			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
-				currentPath.add(to);
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
 			}
 		}
 		//MoveLeft
 		if(direction == 3) {
 			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX() - i * validStepLength, fromPoint.getY());
-				currentPath.add(temporaryPoint);	
+				Point2D temporaryPoint = new Point2D.Double(from.getX() - i * validStepLength, from.getY());
+				robot.setPos(temporaryPoint);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());		
 			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
-				currentPath.add(to);
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
 			}
 		}
 		//MoveDown
 		if(direction == 4) {
 			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY() - i * validStepLength);
-				currentPath.add(temporaryPoint);	
+				Point2D temporaryPoint = new Point2D.Double(from.getX(), from.getY() - i * validStepLength);
+				robot.setPos(temporaryPoint);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());	
 			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
-				currentPath.add(to);
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
 			}
 		}
 		
-		return currentPath;
-	}
-	
-	private List<Point2D> returnSteps(Node from, Node to){
-		
-		List<Point2D> currentPath = new ArrayList<>();
-		
-		int numberOfSteps = calculateNumberOfSteps(from.getPos(),to.getPos());
-		int direction = returnDirection(from.getPos(), to.getPos());
-		
-		Point2D fromPoint = from.getPos();
-		currentPath.add(fromPoint);
-		
-		//Move right
-		if(direction == 1) {
-			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX() + i * validStepLength , fromPoint.getY());
-				currentPath.add(temporaryPoint);	
-			}
-			if(!(currentPath.get(currentPath.size()-1).equals(to.getPos()))) {
-				currentPath.add(to.getPos());
-			}
+		for (String line: currentPath) {
+			returnString += line + "\n";
 		}
-		//MoveUp
-		if(direction == 2) {
-			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY() + i * validStepLength);
-				currentPath.add(temporaryPoint);	
-			}
-			if(!(currentPath.get(currentPath.size()-1).equals(to.getPos()))) {
-				currentPath.add(to.getPos());
-			}
-		}
-		//MoveLeft
-		if(direction == 3) {
-			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX() - i * validStepLength, fromPoint.getY());
-				currentPath.add(temporaryPoint);	
-			}
-			if(!(currentPath.get(currentPath.size()-1).equals(to.getPos()))) {
-				currentPath.add(to.getPos());
-			}
-		}
-		//MoveDown
-		if(direction == 4) {
-			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY() - i * validStepLength);
-				currentPath.add(temporaryPoint);	
-			}
-			if(!(currentPath.get(currentPath.size()-1).equals(to.getPos()))) {
-				currentPath.add(to.getPos());
-			}
-		}
-		
-		return currentPath;
+		return returnString;
 	}
 	
 	

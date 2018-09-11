@@ -13,7 +13,7 @@ public class State {
 	private List<Box> boxes;
 	private List<Box> obstacles;
 
-
+//CLASS THAT CONTAINS THE STATE FOR ALL OBJECTS IN THE WORLD - EVEN UPDATES THE OBJECTS WHILE MOVING IN REAL TME
 
 public State(ProblemSpec problemSpec) {
 	this.problemSpec=problemSpec;
@@ -42,11 +42,11 @@ public RobotConfig getRobotConfig() {
 }
 
 public String returnRobotString() {
-	return "" + robotConfig.getPos().getX() + " " + robotConfig.getPos().getY() + " " + robotConfig.getOrientation();
+	return "" + robotConfig.getPos().getX() + " " + robotConfig.getPos().getY() + " " + robotConfig.getOrientation() + " ";
 }
 
 public String returnBoxString(Box b) {
-	return "" + b.getPos().getX() + " " + b.getPos().getY();
+	return "" + b.getPos().getX() + " " + b.getPos().getY() + " ";
 }
 
 public String returnBoxesString() {
@@ -70,7 +70,7 @@ public String returnObstaclesString() {
 }
 
 public String returnCompleteLineState() {
-	String line = "" + returnRobotString() + " " + returnBoxesString() + " " + returnObstaclesString();
+	String line = "" + returnRobotString() + returnBoxesString() + returnObstaclesString();
 	return line;
 }
 

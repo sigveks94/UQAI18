@@ -44,10 +44,18 @@ public class RobotConfig {
     public Point2D getPos() {
         return pos;
     }
+    
+    public void setPos(Point2D point) {
+    	this.pos=(Point2D) point.clone();
+    }
 
     /** returns the orientation of the robot */
     public double getOrientation() {
         return angle;
+    }
+    
+    public void setOrientation(double alpha) {
+    	this.angle=alpha;
     }
 
     public float getX1(double robotWidth) {
