@@ -59,25 +59,69 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 		return lines;
 	}
 	
+	
+	//HELP METHODS USED IN GENERATEROTATION
+	public String moveRobotRightHalfWidth(RobotConfig robot, double halfwidth) {
+		String line = "";
+		double x2 = Solver.doubleFormatter(robot.getPos().getX() + halfwidth);
+		double y2 = robot.getPos().getY();
+		Point2D goLeftPoint = new Point2D.Double(x2,y2);
+		line += returnStepsRobotDirect(robot.getPos(), goLeftPoint, robot);
+		return line;
+	}
+	
+	public String moveRobotLeftHalfWidth(RobotConfig robot, double halfwidth) {
+		String line = "";
+		double x2 = Solver.doubleFormatter(robot.getPos().getX() - halfwidth);
+		double y2 = Solver.doubleFormatter(robot.getPos().getY());
+		Point2D goLeftPoint = new Point2D.Double(x2,y2);
+		line += returnStepsRobotDirect(robot.getPos(), goLeftPoint, robot);
+		return line;
+	}
+	
+	public String moveRobotUpHalfWidth(RobotConfig robot, double halfwidth) {
+		String line = "";
+		double x2 = Solver.doubleFormatter(robot.getPos().getX());
+		double y2 = Solver.doubleFormatter(robot.getPos().getY() + halfwidth);
+		Point2D goLeftPoint = new Point2D.Double(x2,y2);
+		line += returnStepsRobotDirect(robot.getPos(), goLeftPoint, robot);
+		return line;
+	}
+	
+	public String moveRobotDownHalfWidth(RobotConfig robot, double halfwidth) {
+		String line = "";
+		double x2 = Solver.doubleFormatter(robot.getPos().getX());
+		double y2 = Solver.doubleFormatter(robot.getPos().getY() - halfwidth);
+		Point2D goLeftPoint = new Point2D.Double(x2,y2);
+		line += returnStepsRobotDirect(robot.getPos(), goLeftPoint, robot);
+		return line;
+	}
+	
 	public String generateRotation(RobotConfig robot, Box b, Point2D currentPosition, Point2D nextPosition) {
 		String line = "";
 		double halfwidth = Solver.doubleFormatter(b.getWidth()/2);
 		int direction = returnDirection(currentPosition, nextPosition);
 		if (direction == 1) { // GOING EASTBOUND
 			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS ABOVE THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE ANTI-CLOCKWISE
-				double x = Solver.doubleFormatter(robot.getPos().getX());
-				double y = Solver.doubleFormatter(robot.getPos().getY() + halfwidth);
-				Point2D reversePoint = new Point2D.Double(x, y);
-				line += returnStepsRobotDirect(currentPosition, reversePoint, robot); // adds the string resulting from reversing
-				line += returnStringFromRotating90AntiClockWise(robot); //adds string from rotating
-				//The complete string resulting from this move (current -->reversePoint should be added to line
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up
+				
+				line += returnStringFromRotating90AntiClockWise(robot);//adds string from rotating
+				
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot to the left and adds these strings
+				
+				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+
 			}
 			if(robot.getPos().getY() < b.getRect().getCenterY() -  0.0001) {//ROBOT IS UNDER THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE CLOCKWISE
-				double x = Solver.doubleFormatter(robot.getPos().getX());
-				double y = Solver.doubleFormatter(robot.getPos().getY() - halfwidth);
-				Point2D reversePoint = new Point2D.Double(x, y);
-				line += returnStepsRobotDirect(currentPosition, reversePoint, robot); // adds the string resulting from reversing
+				line += moveRobotDownHalfWidth(robot, halfwidth); // adds the string resulting from reversing
+				
 				line += returnStringFromRotating90AntiClockWise(robot); //adds string from rotating
+				
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot to the left and adds these strings
+				
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+
+				
 				//The complete string resulting from this move (current -->reversePoint should be added to line
 			}
 			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
@@ -85,18 +129,89 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 			}
 		}
 		
-		// GOING EASTBOUND IS NOT FINISHED - IS MISSING MOVING TO LEFT AND UP/DOWN TO FINAL POSITION
+		if(direction == 3) { //GOING WESTBOUND
+			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) { //robot is above the box and needs to be rotated to the right hand side
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up
+				
+				line += returnStringFromRotating90AntiClockWise(robot);//adds string from rotating
+				
+				line += moveRobotRightHalfWidth(robot, halfwidth);  //moves robot to the right and adds these strings
+				
+				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+			}
+			
+			if(robot.getPos().getY() < b.getRect().getCenterY() -  0.0001) { //robot is under the box and needs to be rotated to the right hand side
+				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down
+				
+				line += returnStringFromRotating90AntiClockWise(robot);//adds string from rotating
+				
+				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot to the right and adds these strings
+				
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+			}
+			
+			if(robot.getPos().getX() < b.getRect().getCenterX() -  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
+				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
+				//CAN FIX SO THAT IT CALLS GENERATEROTATION ON ITSELF FIRST
+			}
+		}
 		
+		if(direction == 2) { //GOING UP
+			if(robot.getPos().getX() < b.getRect().getCenterX() -  0.0001) { //robot is left of the box and needs to be rotated beneath box
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot to the left
+				
+				line += returnStringFromRotating90AntiClockWise(robot);//adds string from rotating
+				
+				line += moveRobotDownHalfWidth(robot, halfwidth); //moves down and adds strings
+				
+				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+			}
+			
+			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) { //robot is right of the box and needs to be rotated beneath box
+				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot to the right
+				
+				line += returnStringFromRotating90AntiClockWise(robot);//adds string from rotating
+				
+				line += moveRobotDownHalfWidth(robot, halfwidth); //moves down and adds strings
+				
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+			}
+			
+			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
+				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
+				//CAN FIX SO THAT IT CALLS GENERATEROTATION ON ITSELF FIRST
+			}
+		}
 		
-		//if(direction == 2)
+		if(direction == 4) { //GOING DOWN
+			if(robot.getPos().getX() < b.getRect().getCenterX() -  0.0001) { //robot is left of the box and needs to be rotated above box
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot to the left
+				
+				line += returnStringFromRotating90AntiClockWise(robot); //adds string from rotating
+				
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves up and adds strings
+				
+				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+			}
+			
+			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) { //robot is right of the box and needs to be rotated beneath box
+				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot to the right
+				
+				line += returnStringFromRotating90AntiClockWise(robot); //adds string from rotating
+				
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves up and adds strings
+				
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+			}
+			
+			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
+				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
+				//CAN FIX SO THAT IT CALLS GENERATEROTATION ON ITSELF FIRST
+			}
+		}
 		
-		//if(direction == 3)
-		
-		//if(direction == 4)
-		// IMPLEMENT SITUATIONS WHERE YOU GO UP, DOWN AND LEFT - ABOVE ONLY APPLIES TO EASTBOUND MOVEMENTS
-		
-		
-		return line;
+
+		return line; //RETURNS ENTIRE ROTATIONAL STRING SEGMENT CONTAINING ALL OBJECTS POSITION
 	}
 	
 	public String returnStringFromRotating90AntiClockWise(RobotConfig robot) {
