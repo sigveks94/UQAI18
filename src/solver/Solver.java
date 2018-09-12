@@ -48,6 +48,10 @@ public class Solver {
 	public double getWidth() {
 		return this.width;
 	}
+	
+	public double getHalfWidth() {
+		return this.halfWidth;
+	}
 
 	public List<Node> makePath(Node start, Node goal) {
 		AStar astar = new AStar();
@@ -1102,7 +1106,7 @@ public void initiate() {
     
     
     //ONE TEMPORARY MOVE!! NEEDS AN IMPLEMENTATION FOR EACH MOVE LATER ON!!!!!
-    PathBuilder pb = new PathBuilder(this, state, null, path);
+    //PathBuilder pb = new PathBuilder(this, state, null, path);
     
 }
 

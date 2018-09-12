@@ -50,7 +50,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	
 
 	public String returnStringBulkFromMovingBoxAndRobot() {
-		double halfwidth = solver.getWidth();
+		double halfwidth = solver.getHalfWidth();
 		RobotConfig robot = state.getRobotConfig();
 		String lines = "";
 		Point2D firsPoint = inputBoxPath.get(0).getPos();
