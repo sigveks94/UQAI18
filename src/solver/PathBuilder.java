@@ -40,47 +40,21 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	//3) FINISH RETURNSTRINGBULKFROMMOVINGBOXANDROBOT AND THE OTHER LONG SHIT
 	//4) IMPLEMENT WAYS TO HANDLE THIS STRING IN SOLVER
 	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	public String returnStringBulkFromMovingBoxAndRobot() {
 		double halfwidth = solver.getHalfWidth();
 		RobotConfig robot = state.getRobotConfig();
-		String lines = "";
-		Point2D firsPoint = inputBoxPath.get(0).getPos();
+		String lines = state.returnCompleteLineState() + "\n";
+		Point2D firstPoint = inputBoxPath.get(0).getPos();
 		Point2D secondPoint = inputBoxPath.get(1).getPos();
-		int currentDirection = returnDirection(firsPoint, secondPoint);
+		int currentDirection = returnDirection(firstPoint, secondPoint);
 		
 		for (int i= 0 ; i <= inputBoxPath.size() -2 ; i++) {
 			Point2D fromPoint = inputBoxPath.get(i).getPos();
 			Point2D toPoint = inputBoxPath.get(i+1).getPos();
-			if (!(currentDirection == returnDirection(fromPoint, toPoint))) { //rotate robot first
+			if(!(currentDirection == returnDirection(fromPoint, toPoint))) { //rotate robot first
 				currentDirection = returnDirection(fromPoint, toPoint);
-				if (currentDirection == 1){ //move right
-					Point2D robotPoint = new Point2D.Double(fromPoint.getX()-halfwidth, fromPoint.getY());
-					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
-				}
-				if (currentDirection == 3) { //move left
-					Point2D robotPoint = new Point2D.Double(fromPoint.getX()+halfwidth, fromPoint.getY());
-					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
-				}
-				if(currentDirection == 2) { // move up
-					Point2D robotPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY()- halfwidth);
-					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
-				}
-				if (currentDirection == 4) { //move down
-					Point2D robotPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY()+halfwidth);
-					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
-				}
-				else {
-					System.out.println("Something went wrong in currentdirection");
-				}
+				lines += generateRotation(robot, movingBox, fromPoint, toPoint);
 			}
 			
 			lines += moveBoxAndRobotAlongSingleEdge(robot, movingBox, inputBoxPath.get(i), inputBoxPath.get(i+1), halfwidth);
@@ -114,11 +88,11 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
 				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
 				robot.setPos(temporaryRobotPoint); //moving robot single step
-				box.setPos(temporaryBoxPoint); //moving box single step
+				box.setRect(temporaryBoxPoint); //moving box single step
 				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
 			}
 			if(!(box.getPos().equals(toBoxPoint))) {
-				box.setPos(toBoxPoint);
+				box.setRect(toBoxPoint);
 				robot.setPos(toRobotPoint);
 				currentPath.add(state.returnCompleteLineState());
 			}
@@ -128,14 +102,14 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 			Point2D fromRobotPoint = new Point2D.Double(fromBoxPoint.getX(), fromBoxPoint.getY()-halfwidth);
 			Point2D toRobotPoint = new Point2D.Double(toBoxPoint.getX(), toBoxPoint.getY()-halfwidth);
 			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
-				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
+				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX(), fromBoxPoint.getY() + i * validStepLength);
+				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX(), fromRobotPoint.getY() + i * validStepLength);
 				robot.setPos(temporaryRobotPoint); //moving robot single step
-				box.setPos(temporaryBoxPoint); //moving box single step
+				box.setRect(temporaryBoxPoint); //moving box single step
 				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
 			}
 			if(!(box.getPos().equals(toBoxPoint))) {
-				box.setPos(toBoxPoint);
+				box.setRect(toBoxPoint);
 				robot.setPos(toRobotPoint);
 				currentPath.add(state.returnCompleteLineState());
 			}
@@ -145,14 +119,14 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 			Point2D fromRobotPoint = new Point2D.Double(fromBoxPoint.getX()+halfwidth, fromBoxPoint.getY());
 			Point2D toRobotPoint = new Point2D.Double(toBoxPoint.getX()+halfwidth, toBoxPoint.getY());
 			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
-				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
+				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() - i * validStepLength , fromBoxPoint.getY());
+				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() - i * validStepLength , fromRobotPoint.getY());
 				robot.setPos(temporaryRobotPoint); //moving robot single step
-				box.setPos(temporaryBoxPoint); //moving box single step
+				box.setRect(temporaryBoxPoint); //moving box single step
 				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
 			}
 			if(!(box.getPos().equals(toBoxPoint))) {
-				box.setPos(toBoxPoint);
+				box.setRect(toBoxPoint);
 				robot.setPos(toRobotPoint);
 				currentPath.add(state.returnCompleteLineState());
 			}
@@ -162,14 +136,14 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 			Point2D fromRobotPoint = new Point2D.Double(fromBoxPoint.getX(), fromBoxPoint.getY()+halfwidth);
 			Point2D toRobotPoint = new Point2D.Double(toBoxPoint.getX(), toBoxPoint.getY()+halfwidth);
 			for(int i = 1; i <= numberOfSteps; i++) {
-				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
-				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
+				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX(), fromBoxPoint.getY() - i * validStepLength);
+				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX(), fromRobotPoint.getY() - i * validStepLength);
 				robot.setPos(temporaryRobotPoint); //moving robot single step
-				box.setPos(temporaryBoxPoint); //moving box single step
+				box.setRect(temporaryBoxPoint); //moving box single step
 				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
 			}
 			if(!(box.getPos().equals(toBoxPoint))) {
-				box.setPos(toBoxPoint);
+				box.setRect(toBoxPoint);
 				robot.setPos(toRobotPoint);
 				currentPath.add(state.returnCompleteLineState());
 			}
@@ -231,6 +205,8 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot to the left and adds these strings
 				
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				
+				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 
 			}
 			if(robot.getPos().getY() < b.getRect().getCenterY() -  0.0001) {//ROBOT IS UNDER THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE CLOCKWISE
@@ -242,11 +218,18 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				
 				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 
-				
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 				//The complete string resulting from this move (current -->reversePoint should be added to line
 			}
 			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
-				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
+				line += moveRobotRightHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotLeftHalfWidth(robot, halfwidth);
+				line += moveRobotLeftHalfWidth(robot, halfwidth);
+				line += moveRobotLeftHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
 			}
 		}
 		
@@ -259,6 +242,8 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotRightHalfWidth(robot, halfwidth);  //moves robot to the right and adds these strings
 				
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				
+				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 			}
 			
 			if(robot.getPos().getY() < b.getRect().getCenterY() -  0.0001) { //robot is under the box and needs to be rotated to the right hand side
@@ -269,11 +254,19 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot to the right and adds these strings
 				
 				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+				
+				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 			}
 			
-			if(robot.getPos().getX() < b.getRect().getCenterX() -  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
-				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
-				//CAN FIX SO THAT IT CALLS GENERATEROTATION ON ITSELF FIRST
+			if(robot.getPos().getX() < b.getRect().getCenterX() -  0.0001) {//ROBOT IS LEFT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE RIGHT SIDE
+				line += moveRobotLeftHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotRightHalfWidth(robot, halfwidth);
+				line += moveRobotRightHalfWidth(robot, halfwidth);
+				line += moveRobotRightHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
 			}
 		}
 		
@@ -286,6 +279,8 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves down and adds strings
 				
 				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				
+				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 			}
 			
 			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) { //robot is right of the box and needs to be rotated beneath box
@@ -296,11 +291,23 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves down and adds strings
 				
 				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 			}
 			
-			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
-				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
-				//CAN FIX SO THAT IT CALLS GENERATEROTATION ON ITSELF FIRST
+			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS ON TOP OF THE BOX AND NEEDS TO BE MOVED TO THE BOTTOM OF THE BOX
+				
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += returnStringFromRotating90AntiClockWise(robot);
+				line += moveRobotLeftHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
+				line += moveRobotRightHalfWidth(robot, halfwidth);
+				line += returnStringFromRotating90AntiClockWise(robot);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				
 			}
 		}
 		
@@ -313,6 +320,8 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotUpHalfWidth(robot, halfwidth); //moves up and adds strings
 				
 				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+				
+				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 			}
 			
 			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) { //robot is right of the box and needs to be rotated beneath box
@@ -323,11 +332,21 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotUpHalfWidth(robot, halfwidth); //moves up and adds strings
 				
 				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+				
+				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 			}
 			
-			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
-				System.out.println("The previous position of the robot is 180 degrees wrong side, fix endposition!");
-				//CAN FIX SO THAT IT CALLS GENERATEROTATION ON ITSELF FIRST
+			if(robot.getPos().getY() < b.getRect().getCenterY() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
+				line += moveRobotDownHalfWidth(robot, halfwidth);
+				line += returnStringFromRotating90AntiClockWise(robot);
+				line += moveRobotLeftHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotUpHalfWidth(robot, halfwidth);
+				line += moveRobotRightHalfWidth(robot, halfwidth);
+				line += returnStringFromRotating90AntiClockWise(robot);
+				line += moveRobotDownHalfWidth(robot, halfwidth);
 			}
 		}
 		
@@ -353,7 +372,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	}
 	
 	public double calculateAlphaChange() {
-		return calculateNumberOfRotationSteps90Degrees()*Math.PI;
+		return ((Math.PI)/2)/calculateNumberOfRotationSteps90Degrees();
 	}
 	
 	public int calculateNumberOfSteps(Point2D from, Point2D to) {

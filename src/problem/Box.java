@@ -40,8 +40,10 @@ public abstract class Box {
 	    this.rect = new Rectangle2D.Double(Solver.doubleFormatter(x), Solver.doubleFormatter(y), Solver.doubleFormatter(w), Solver.doubleFormatter(h));
 	}
 	
-	public void setPos(Point2D point) {
-		this.pos = point;
+	public void setRect(Point2D point) {
+		this.pos.setLocation(point.getX() - Solver.doubleFormatter((rect.getWidth()/2)), point.getY() - Solver.doubleFormatter((rect.getWidth()/2)));
+		Rectangle2D newRectangle = new Rectangle2D.Double(this.pos.getX(), this.pos.getY() , rect.getWidth(), rect.getWidth());
+		this.rect.setFrame(newRectangle);
 	}
 
 	/**

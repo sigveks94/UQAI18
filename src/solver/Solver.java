@@ -3,6 +3,10 @@ package solver;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -1073,22 +1077,44 @@ private void connectGoalNode(Box b) {
  */
 
 private void connectStartBoxNode(MovingBox startBox) {
-	Node connectNode = boxNodes.get(startBox).get(0);
 	Node startNode = createStartBoxNode(startBox);
-	Point2D helpPoint = new Point2D.Double(startNode.getPos().getX(), connectNode.getPos().getY());
-	Node helpNode = new HelpNode(helpPoint);
-	nodes.add(helpNode);
-	startNode.addEdge(helpNode);
-	helpNode.addEdge(startNode);
-	connectNode.addEdge(helpNode);
-	helpNode.addEdge(connectNode);
+	List<Node> connectNodes = boxNodes.get(startBox);
+	HelpNode helpNode1 = null;
+	HelpNode helpNode2 = null;
+	
+	for(Node connectNode : connectNodes) {
+		Point2D helpPoint = new Point2D.Double(startNode.getPos().getX(), connectNode.getPos().getY());
+		if(connectNode.getPos().getY() < startNode.getPos().getY()) {
+			if(helpNode1 == null) {
+				helpNode1 = new HelpNode(helpPoint);
+				nodes.add(helpNode1);
+				startNode.addEdge(helpNode1);
+				helpNode1.addEdge(startNode);
+			}
+			connectNode.addEdge(helpNode1);
+			helpNode1.addEdge(connectNode);
+		} 
+		else {
+			if(helpNode2 == null) {
+				helpNode2 = new HelpNode(helpPoint);
+				nodes.add(helpNode2);
+				startNode.addEdge(helpNode2);
+				helpNode2.addEdge(startNode);
+			}
+			connectNode.addEdge(helpNode2);
+			helpNode2.addEdge(connectNode);
+		}
+		
+		
+	}
 }
 
 /**
  * Main method to make all operations in correct order.
+ * @throws IOException 
  */
 
-public void initiate() {
+public void initiate() throws IOException {
 	makeInitialSampling();
     makeInitialEdges();
     createEdgesBetweenAllBoxes();
@@ -1096,11 +1122,20 @@ public void initiate() {
     connectBoxToGoal(mb);
     connectGoalNode(mb);
     connectStartBoxNode(mb);
+    RobotNode robotNode = connectRobotNode();
     Node startNode = mb.getStartNode();
     Node goalNode = mb.getGoalNode();
-    List<Node> path = makePath(startNode, goalNode);
+    List<Node> path = makePath(robotNode, startNode);
     
-    //PathBuilder pb = new PathBuilder(path);
+    System.out.println(path);
+   /* PathBuilder pb = new PathBuilder(this, state, null, path, mb);
+    String outPutString = pb.returnStringBulkFromMovingBoxAndRobot();
+    File outputFile = new File("/Users/ErlendHjelleStrandkleiv/Projects/UQAI18/" + "kjoerDa.txt");
+	BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+	writer.write(outPutString);
+	writer.close();	
+	*/
+    
     //String outPutString = generateOutputMove(path, pb);
     //System.out.println(outPutString);
     
@@ -1114,8 +1149,28 @@ public State getState() {
 	return this.state;
 }
 
-private Node sampleRobotNode(RobotConfig robotPosition) {
-	Node robotNode = new RobotNode(robotPosition.getPos());
+private Node sampleRobotNode() {
+	Node robotNode = new RobotNode(state.getRobotConfig().getPos());
+	nodes.add(robotNode);
+	return robotNode;
+}
+
+private RobotNode connectRobotNode() {
+	RobotNode robotNode = (RobotNode) sampleRobotNode();
+	Node closestNode = null;
+	double distance = 100;
+	
+	for(Node n : nodes) {
+		if(n.equals(robotNode)) {
+			continue;
+		}
+		double currentDistance = n.calculateDistance(robotNode);
+		if(currentDistance < distance) {
+			distance = currentDistance;
+			closestNode = n;
+		}
+	}
+	connectViaHelpNode(robotNode, closestNode);
 	return robotNode;
 }
 

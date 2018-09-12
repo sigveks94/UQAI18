@@ -28,12 +28,12 @@ public void setRobotConfig(RobotConfig robot) {
 
 public void setBoxState(Box b, Point2D point) {
 	int index = problemSpec.getMovingBoxes().indexOf(b);
-	boxes.get(index).setPos(point);
+	boxes.get(index).setRect(point);
 }
 
 public void setObstacleState(Box b, Point2D point) {
 	int index = problemSpec.getMovingObstacles().indexOf(b);
-	obstacles.get(index).setPos(point);
+	obstacles.get(index).setRect(point);
 }
 
 
@@ -46,7 +46,7 @@ public String returnRobotString() {
 }
 
 public String returnBoxString(Box b) {
-	return "" + b.getPos().getX() + " " + b.getPos().getY() + " ";
+	return "" + b.getRect().getCenterX() + " " + b.getRect().getCenterY() + " ";
 }
 
 public String returnBoxesString() {
@@ -58,12 +58,12 @@ public String returnBoxesString() {
 }
 
 public String returnObstacleString(Box b) {
-	return "" + b.getPos().getX() + " " + b.getPos().getY();
+	return "" + b.getRect().getCenterX() + " " + b.getRect().getCenterY();
 }
 
 public String returnObstaclesString() {
 	String line = "";
-	for (Box b: boxes) {
+	for (Box b: obstacles) {
 		line += returnObstacleString(b);
 	}
 	return line;
