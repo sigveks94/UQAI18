@@ -20,12 +20,14 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	private List<Node> inputRobotPath; //INPUTTED A-STARRRED PATH OF ROBOT BETWEEN ALL AVAILABLE NODES
 	private List<Node> inputBoxPath;   //INPUTTED A-STARRRED PATH OF BOX BETWEEN ALL AVAILABLE NODES
 	private final double validStepLength = 0.001;
+	private Box movingBox;
 	
-	public PathBuilder(Solver solver, State state, List<Node> robotPath, List<Node> boxPath) { //if robotPath == null - that means that the box is to be moved and the robotpath must be calculated
+	public PathBuilder(Solver solver, State state, List<Node> robotPath, List<Node> boxPath, Box box) { //if robotPath == null - that means that the box is to be moved and the robotpath must be calculated
 		this.inputRobotPath=robotPath;                             //If boxPath == null - that means that only the box is to be moved
 		this.inputBoxPath=boxPath;
 		this.solver=solver;
 		this.state=state;
+		this.movingBox=box;
 	}
 	
 	
@@ -48,17 +50,136 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	
 
 	public String returnStringBulkFromMovingBoxAndRobot() {
+		double halfwidth = solver.getWidth();
+		RobotConfig robot = state.getRobotConfig();
 		String lines = "";
+		Point2D firsPoint = inputBoxPath.get(0).getPos();
+		Point2D secondPoint = inputBoxPath.get(1).getPos();
+		int currentDirection = returnDirection(firsPoint, secondPoint);
+		
+		for (int i= 0 ; i <= inputBoxPath.size() -2 ; i++) {
+			Point2D fromPoint = inputBoxPath.get(i).getPos();
+			Point2D toPoint = inputBoxPath.get(i+1).getPos();
+			if (!(currentDirection == returnDirection(fromPoint, toPoint))) { //rotate robot first
+				currentDirection = returnDirection(fromPoint, toPoint);
+				if (currentDirection == 1){ //move right
+					Point2D robotPoint = new Point2D.Double(fromPoint.getX()-halfwidth, fromPoint.getY());
+					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
+				}
+				if (currentDirection == 3) { //move left
+					Point2D robotPoint = new Point2D.Double(fromPoint.getX()+halfwidth, fromPoint.getY());
+					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
+				}
+				if(currentDirection == 2) { // move up
+					Point2D robotPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY()- halfwidth);
+					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
+				}
+				if (currentDirection == 4) { //move down
+					Point2D robotPoint = new Point2D.Double(fromPoint.getX(), fromPoint.getY()+halfwidth);
+					lines += generateRotation(robot, movingBox, robot.getPos(), robotPoint);
+				}
+				else {
+					System.out.println("Something went wrong in currentdirection");
+				}
+			}
+			
+			lines += moveBoxAndRobotAlongSingleEdge(robot, movingBox, inputBoxPath.get(i), inputBoxPath.get(i+1), halfwidth);
+		}
+		
 		// RETURN AN INTERPOLATED COMPLETE STRING CONTAINING THE PATH OF MOVING BOX AND PUSHING ROBOTARM FROM A TO B
 		return lines;
 	}
 	
-	public String returnStringBulkFromMovingOnlyRobot() {
+	public String returnStringBulkFromMovingOnlyRobot() { //NEEDS TO FIND WAY TO RIGHT POSITION OF BOX AS WELL!!!!
 		String lines = "";
 		// RETURN AN INTERPOLATED COMPLETE STRING CONTAINING THE PATH OF MOVING ROBOT FROM A TO B
 		return lines;
 	}
 	
+	
+	public String moveBoxAndRobotAlongSingleEdge(RobotConfig robot, Box box, Node fromNode, Node toNode, double halfwidth) {
+		
+		List<String> currentPath = new ArrayList<>();
+		String returnString = "";
+		Point2D fromBoxPoint = new Point2D.Double(fromNode.getPos().getX(), fromNode.getPos().getY());
+		Point2D toBoxPoint = new Point2D.Double(toNode.getPos().getX(), toNode.getPos().getY());
+		int numberOfSteps = calculateNumberOfSteps(fromBoxPoint,toBoxPoint);
+		int direction = returnDirection(fromBoxPoint, toBoxPoint);
+		
+		//Move right
+		if(direction == 1) {
+			Point2D fromRobotPoint = new Point2D.Double(fromBoxPoint.getX()-halfwidth, fromBoxPoint.getY());
+			Point2D toRobotPoint = new Point2D.Double(toBoxPoint.getX()-halfwidth, toBoxPoint.getY());
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
+				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
+				robot.setPos(temporaryRobotPoint); //moving robot single step
+				box.setPos(temporaryBoxPoint); //moving box single step
+				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
+			}
+			if(!(box.getPos().equals(toBoxPoint))) {
+				box.setPos(toBoxPoint);
+				robot.setPos(toRobotPoint);
+				currentPath.add(state.returnCompleteLineState());
+			}
+		}
+		//MoveUp
+		if(direction == 2) {
+			Point2D fromRobotPoint = new Point2D.Double(fromBoxPoint.getX(), fromBoxPoint.getY()-halfwidth);
+			Point2D toRobotPoint = new Point2D.Double(toBoxPoint.getX(), toBoxPoint.getY()-halfwidth);
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
+				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
+				robot.setPos(temporaryRobotPoint); //moving robot single step
+				box.setPos(temporaryBoxPoint); //moving box single step
+				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
+			}
+			if(!(box.getPos().equals(toBoxPoint))) {
+				box.setPos(toBoxPoint);
+				robot.setPos(toRobotPoint);
+				currentPath.add(state.returnCompleteLineState());
+			}
+		}
+		//MoveLeft
+		if(direction == 3) {
+			Point2D fromRobotPoint = new Point2D.Double(fromBoxPoint.getX()+halfwidth, fromBoxPoint.getY());
+			Point2D toRobotPoint = new Point2D.Double(toBoxPoint.getX()+halfwidth, toBoxPoint.getY());
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
+				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
+				robot.setPos(temporaryRobotPoint); //moving robot single step
+				box.setPos(temporaryBoxPoint); //moving box single step
+				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
+			}
+			if(!(box.getPos().equals(toBoxPoint))) {
+				box.setPos(toBoxPoint);
+				robot.setPos(toRobotPoint);
+				currentPath.add(state.returnCompleteLineState());
+			}
+		}
+		//MoveDown
+		if(direction == 4) {
+			Point2D fromRobotPoint = new Point2D.Double(fromBoxPoint.getX(), fromBoxPoint.getY()+halfwidth);
+			Point2D toRobotPoint = new Point2D.Double(toBoxPoint.getX(), toBoxPoint.getY()+halfwidth);
+			for(int i = 1; i <= numberOfSteps; i++) {
+				Point2D temporaryBoxPoint = new Point2D.Double(fromBoxPoint.getX() + i * validStepLength , fromBoxPoint.getY());
+				Point2D temporaryRobotPoint = new Point2D.Double(fromRobotPoint.getX() + i * validStepLength , fromRobotPoint.getY());
+				robot.setPos(temporaryRobotPoint); //moving robot single step
+				box.setPos(temporaryBoxPoint); //moving box single step
+				currentPath.add(state.returnCompleteLineState());	//adding resulting stringline from this step to the list of steps
+			}
+			if(!(box.getPos().equals(toBoxPoint))) {
+				box.setPos(toBoxPoint);
+				robot.setPos(toRobotPoint);
+				currentPath.add(state.returnCompleteLineState());
+			}
+		}
+		
+		for (String line: currentPath) {
+			returnString += line + "\n";
+		}
+		return returnString;
+	}
 	
 	//HELP METHODS USED IN GENERATEROTATION
 	public String moveRobotRightHalfWidth(RobotConfig robot, double halfwidth) {
@@ -221,7 +342,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 		for (int i =1; i <= calculateNumberOfRotationSteps90Degrees(); i++) {
 			robot.setOrientation(currentAlpha +  alpha*i);
 			state.setRobotConfig(robot);
-			line += state.returnCompleteLineState();
+			line += state.returnCompleteLineState() + "\n";
 		}
 		return line;
 	}
