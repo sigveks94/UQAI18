@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 
 import problem.*;
 
@@ -430,10 +431,19 @@ public boolean isCollisionFreePoint(Point2D point) {
  */
 
 
-public void deleteBoxSampling(Box b) {
+public void deleteBoxSampling(MovingBox b) {
 	
 	List<Node> nodesConnectedToBox = new ArrayList<>();
 	nodesConnectedToBox = boxNodes.get(b);
+	StartBoxNode startNode = (StartBoxNode) b.getStartNode();
+	List<Node> startNodeConnections = startNode.getEdges();
+	
+	for(Node n: startNodeConnections) {
+		startNode.removeEdge(n);
+		n.removeEdge(startNode);
+		nodes.remove(n);
+		nodes.remove(startNode);
+	}
 	
 	for(Node n : nodesConnectedToBox) {
 		nodes.remove(n);
@@ -448,6 +458,11 @@ public void deleteBoxSampling(Box b) {
 			m.removeEdge(n);
 		}
 	}
+	boxNodes.remove(b);
+}
+
+
+private void deleteMovingObstacleSampling(Box b) {
 	boxNodes.remove(b);
 }
 
@@ -466,6 +481,7 @@ public void makeBoxSampling(Box b) {
 		familyNodes.add(node);
 	}
 	boxNodes.put(b, familyNodes);
+	createBoxEdges(b);
 }
 
 
@@ -602,8 +618,6 @@ public void createBoxEdges(Box b){
 		if(isCollisionFreeEdge(node4, node3)) {
 			node4.addEdge(node3);
 			node3.addEdge(node4);
-		} else {
-			System.out.println("Node 4 :" + node4 + " , Node3: " + node3);
 		}
 	}
 	
@@ -988,8 +1002,13 @@ private boolean connectViaHelpNode(Node bestNode1, Node bestNode2) {
 
 	Node helpNode = new HelpNode(helpPoint);
 	
+	if(bestNode1.getPos().getX() == bestNode2.getPos().getX() || bestNode1.getPos().getY() == bestNode2.getPos().getY()) {
+		bestNode1.addEdge(bestNode2);
+		bestNode2.addEdge(bestNode1);
+		return true;
+	}
 	if(isCollisionFreeEdge(bestNode1, helpNode) && isCollisionFreeEdge(helpNode, bestNode2)) {
-		nodes.add(helpNode);
+		nodes.add(helpNode);	
 		bestNode1.addEdge(helpNode);
 		helpNode.addEdge(bestNode1);
 		bestNode2.addEdge(helpNode);
@@ -1114,36 +1133,34 @@ private void connectStartBoxNode(MovingBox startBox) {
  * @throws IOException 
  */
 
-public void initiate() throws IOException {
+public String initiate(MovingBox b) throws IOException {
 	makeInitialSampling();
     makeInitialEdges();
     createEdgesBetweenAllBoxes();
-    MovingBox mb = (MovingBox) ps.getMovingBoxes().get(0);
-    connectBoxToGoal(mb);
-    connectGoalNode(mb);
-    connectStartBoxNode(mb);
-    RobotNode robotNode = connectRobotNode();
-    Node startNode = mb.getStartNode();
-    Node goalNode = mb.getGoalNode();
-    List<Node> path = makePath(robotNode, startNode);
-    
-    System.out.println(path);
-   /* PathBuilder pb = new PathBuilder(this, state, null, path, mb);
-    String outPutString = pb.returnStringBulkFromMovingBoxAndRobot();
-    File outputFile = new File("/Users/ErlendHjelleStrandkleiv/Projects/UQAI18/" + "kjoerDa.txt");
-	BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-	writer.write(outPutString);
-	writer.close();	
-	*/
-    
-    //String outPutString = generateOutputMove(path, pb);
-    //System.out.println(outPutString);
-    
-    
-    //ONE TEMPORARY MOVE!! NEEDS AN IMPLEMENTATION FOR EACH MOVE LATER ON!!!!!
-    //PathBuilder pb = new PathBuilder(this, state, null, path);
-    
+    connectStartBoxNode(b);
+    RobotNode robotNode1 = connectRobotNode();
+    Node startNode1 = b.getStartNode();
+    List<Node> robotPath = makePath(robotNode1, startNode1);
+    connectBoxToGoal(b);
+    connectGoalNode(b);
+    Node goalNode1 = b.getGoalNode();
+    PathBuilder pb1 = new PathBuilder(this, state, robotPath, null, b);
+    String outPutString = pb1.returnStringBulkFromMovingOnlyRobot();
+    List<Node> boxPath1 = makePath(startNode1, goalNode1);
+    PathBuilder pb2 = new PathBuilder(this, state, null, boxPath1, b);
+    outPutString += pb2.returnStringBulkFromMovingBoxAndRobot(); 
+    removeAllConnections();
+    return outPutString;
 }
+
+private void removeAllConnections() {
+	for(Box b : ps.getMovingBoxes()) {
+		MovingBox box = (MovingBox) b;
+		box.setGoalNode(null);
+		box.setStartNode(null);
+	}
+}
+	
 
 public State getState() {
 	return this.state;
@@ -1155,13 +1172,30 @@ private Node sampleRobotNode() {
 	return robotNode;
 }
 
+private void deleteRobotNode(RobotNode robotNode) {
+	Node helpNode = robotNode.getEdges().get(0);
+	
+	robotNode.removeEdge(helpNode);
+	helpNode.removeEdge(robotNode);
+	nodes.remove(robotNode);
+	
+	if(helpNode instanceof HelpNode) {
+		List<Node> edges = helpNode.getEdges();
+		for(int i = 0; i < edges.size() - 1; i++) {
+			helpNode.getEdges().get(0).removeEdge(helpNode);
+			helpNode.removeEdge(helpNode.getEdges().get(0));
+		}
+		nodes.remove(helpNode);
+	}
+}
+
 private RobotNode connectRobotNode() {
 	RobotNode robotNode = (RobotNode) sampleRobotNode();
 	Node closestNode = null;
 	double distance = 100;
 	
 	for(Node n : nodes) {
-		if(n.equals(robotNode)) {
+		if(n.getPos() == robotNode.getPos()) {
 			continue;
 		}
 		double currentDistance = n.calculateDistance(robotNode);

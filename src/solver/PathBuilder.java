@@ -40,13 +40,66 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	//3) FINISH RETURNSTRINGBULKFROMMOVINGBOXANDROBOT AND THE OTHER LONG SHIT
 	//4) IMPLEMENT WAYS TO HANDLE THIS STRING IN SOLVER
 	
+	
+	public String rotateRobotTo180Degrees() {
+		String line = "";
+		RobotConfig robotConfig = state.getRobotConfig();
+		
+		double angle = robotConfig.getOrientation();
+		double rotate = 0;
+		
+		double offSet = angle%Math.PI;
+		
+		int numberOf180DegreeRotations = (int) ((angle - offSet)/Math.PI);
+		
+		rotate = angle - numberOf180DegreeRotations * Math.PI;
+		double rotationStep = calculateAlphaChange();
+		
+		int numberOfRotationSteps = (int) Math.floor(rotate/rotationStep);
+		
+		for(int i = 0; i <= numberOfRotationSteps; i++) {
+			robotConfig.setOrientation(angle - i* rotationStep);
+			line += state.returnCompleteLineState() + "\n";
+		}
+		if(!(angle == numberOf180DegreeRotations*Math.PI)) {
+			robotConfig.setOrientation(numberOf180DegreeRotations*Math.PI);
+			line += state.returnCompleteLineState() + "\n";
+		}
+		return line;
+	}
+	
+	public String moveRobotToCorrectPosition() {
+		String line = "";
+		double halfwidth = solver.getHalfWidth();
+		RobotConfig robotConfig = state.getRobotConfig();
+		Node centerBoxNode = inputRobotPath.get(inputRobotPath.size()-1);
+		Node endingPosition = inputRobotPath.get(inputRobotPath.size()-2);
+		
+		int direction = returnDirection( endingPosition.getPos(), centerBoxNode.getPos());
+		
+		//UP
+		if(direction == 2) {
+			line += moveRobotUpHalfWidth(robotConfig, halfwidth);
+		}
+		
+		//DOWN
+		if(direction == 4) {
+			line += moveRobotDownHalfWidth(robotConfig, halfwidth);
+		}
+		
+		return line;
+		
+	}
 
 	public String returnStringBulkFromMovingBoxAndRobot() {
 		double halfwidth = solver.getHalfWidth();
 		RobotConfig robot = state.getRobotConfig();
 		String lines = state.returnCompleteLineState() + "\n";
+		System.out.println(inputBoxPath);
 		Point2D firstPoint = inputBoxPath.get(0).getPos();
 		Point2D secondPoint = inputBoxPath.get(1).getPos();
+		
+		lines += generateRotation(robot, movingBox, firstPoint, secondPoint);
 		int currentDirection = returnDirection(firstPoint, secondPoint);
 		
 		for (int i= 0 ; i <= inputBoxPath.size() -2 ; i++) {
@@ -65,7 +118,16 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	}
 	
 	public String returnStringBulkFromMovingOnlyRobot() { //NEEDS TO FIND WAY TO RIGHT POSITION OF BOX AS WELL!!!!
-		String lines = "";
+		RobotConfig robot = state.getRobotConfig();
+		String lines = state.returnCompleteLineState() + "\n"; 
+		lines += rotateRobotTo180Degrees();
+		
+		for(int i = 0; i < inputRobotPath.size() - 2; i++) {
+			Point2D fromPoint = inputRobotPath.get(i).getPos();
+			Point2D toPoint = inputRobotPath.get(i+1).getPos();
+			lines += returnStepsRobotDirect(fromPoint, toPoint, robot);
+		}
+		lines += moveRobotToCorrectPosition();
 		// RETURN AN INTERPOLATED COMPLETE STRING CONTAINING THE PATH OF MOVING ROBOT FROM A TO B
 		return lines;
 	}
@@ -416,6 +478,11 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				state.setRobotConfig(robot);
 				currentPath.add(state.returnCompleteLineState());	
 			}
+			if(currentPath.isEmpty()) {
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
+			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
 				robot.setPos(to);
 				state.setRobotConfig(robot);
@@ -429,6 +496,11 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				robot.setPos(temporaryPoint);
 				state.setRobotConfig(robot);
 				currentPath.add(state.returnCompleteLineState());		
+			}
+			if(currentPath.isEmpty()) {
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
 			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
 				robot.setPos(to);
@@ -444,6 +516,11 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				state.setRobotConfig(robot);
 				currentPath.add(state.returnCompleteLineState());		
 			}
+			if(currentPath.isEmpty()) {
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
+			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
 				robot.setPos(to);
 				state.setRobotConfig(robot);
@@ -457,6 +534,11 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				robot.setPos(temporaryPoint);
 				state.setRobotConfig(robot);
 				currentPath.add(state.returnCompleteLineState());	
+			}
+			if(currentPath.isEmpty()) {
+				robot.setPos(to);
+				state.setRobotConfig(robot);
+				currentPath.add(state.returnCompleteLineState());
 			}
 			if(!(currentPath.get(currentPath.size()-1).equals(to))) {
 				robot.setPos(to);
