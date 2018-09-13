@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input1.txt");
+            ps.loadProblem("input3.txt");
             Program program = new Program(ps);
             double startTime = System.nanoTime();
             program.run();

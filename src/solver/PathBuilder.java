@@ -257,6 +257,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	public String generateRotation(RobotConfig robot, Box b, Point2D currentPosition, Point2D nextPosition) {
 		String line = "";
 		double halfwidth = Solver.doubleFormatter(b.getWidth()/2);
+		double fakeHalfWidth = solver.getFakeHalfWidth();
 		int direction = returnDirection(currentPosition, nextPosition);
 		if (direction == 1) { // GOING EASTBOUND
 			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS ABOVE THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE ANTI-CLOCKWISE
@@ -354,7 +355,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				
 				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 				
-				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				line += moveRobotLeftHalfWidth(robot, fakeHalfWidth); //moves robot down to the correct endpoint
 			}
 			
 			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS ON TOP OF THE BOX AND NEEDS TO BE MOVED TO THE BOTTOM OF THE BOX

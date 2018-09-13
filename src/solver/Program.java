@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
 
+import problem.Box;
 import problem.MovingBox;
 import problem.ProblemSpec;
 
@@ -20,10 +22,17 @@ public class Program {
 	
 	public void run() throws IOException {
 		String outPutString = state.returnCompleteLineState() + "\n";
-		for(int i = 0; i < ps.getMovingBoxes().size(); i++) {
+		while(!isFinished()){
+			int numberOfMovingBoxes = ps.getMovingBoxes().size();
+			Random rand = new Random();
+			int i = rand.nextInt(numberOfMovingBoxes);
 			Solver solver = new Solver(ps);
 			MovingBox mb = (MovingBox) ps.getMovingBoxes().get(i);
-			outPutString += solver.initiate(mb);
+			String returnString = solver.initiate(mb);
+			if(returnString.equals("")) {
+				continue;
+			}
+			outPutString += returnString;
 		}
 		
 		int length = outPutString.split("\n").length;
@@ -31,7 +40,7 @@ public class Program {
 		writeToFile(length + "\n" + outPutString);
 	}
 	
-	public void writeToFile(String string) throws IOException {
+	private void writeToFile(String string) throws IOException {
 		File outputFile = new File("/Users/ErlendHjelleStrandkleiv/Projects/UQAI18/" + "finalOutput.txt");
 		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
 		writer.write(string);
@@ -39,7 +48,16 @@ public class Program {
 	}
 	
 	
-	
+	private boolean isFinished() {
+		MovingBox movingBox;
+		for(Box b : ps.getMovingBoxes()) {
+			movingBox = (MovingBox) b;
+			if(!movingBox.isFinished()) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	
 	

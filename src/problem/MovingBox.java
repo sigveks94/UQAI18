@@ -15,6 +15,7 @@ public class MovingBox extends Box {
 	
 	Node goalNode;
 	Node startNode;
+	boolean inGoal = false;
 
 	/**
 	 * Constructs a Moving box at a position width a side width
@@ -44,6 +45,14 @@ public class MovingBox extends Box {
     
     public Node getGoalNode() {
     	return goalNode;
+    }
+    
+    public void setFinished() {
+    	inGoal = true;
+    }
+    
+    public boolean isFinished() {
+    	return inGoal;
     }
     
     

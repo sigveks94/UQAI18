@@ -57,6 +57,10 @@ public class Solver {
 	public double getHalfWidth() {
 		return this.halfWidth;
 	}
+	
+	public double getFakeHalfWidth() {
+		return this.fakeHalfWidth;
+	}
 
 	public List<Node> makePath(Node start, Node goal) {
 		AStar astar = new AStar();
@@ -1141,14 +1145,21 @@ public String initiate(MovingBox b) throws IOException {
     RobotNode robotNode1 = connectRobotNode();
     Node startNode1 = b.getStartNode();
     List<Node> robotPath = makePath(robotNode1, startNode1);
+    if(robotPath.isEmpty()) {
+    	return "";
+    }
     connectBoxToGoal(b);
     connectGoalNode(b);
     Node goalNode1 = b.getGoalNode();
     PathBuilder pb1 = new PathBuilder(this, state, robotPath, null, b);
     String outPutString = pb1.returnStringBulkFromMovingOnlyRobot();
     List<Node> boxPath1 = makePath(startNode1, goalNode1);
+    if(boxPath1.isEmpty()) {
+    	return "";
+    }
     PathBuilder pb2 = new PathBuilder(this, state, null, boxPath1, b);
-    outPutString += pb2.returnStringBulkFromMovingBoxAndRobot(); 
+    outPutString += pb2.returnStringBulkFromMovingBoxAndRobot();
+    b.setFinished();
     removeAllConnections();
     return outPutString;
 }
