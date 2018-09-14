@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -143,6 +144,11 @@ public void makeInitialSampling() {
 		staticObstacleNodes.put(so, familyNodes);
 	}
 	
+}
+
+
+public double getFakeWidth() {
+	return fakeWidth;
 }
 
 /**
@@ -321,7 +327,8 @@ public Node addNode(StaticObstacle obstacle, int i) {
  */
 
 public static double doubleFormatter(double d) {
-	NumberFormat formatter = new DecimalFormat("#0.0000");
+	NumberFormat formatter = new DecimalFormat("#0.000000000000000000000");
+	formatter.setRoundingMode(RoundingMode.HALF_UP);
 	String doubleString = formatter.format(d);
 	return Double.parseDouble(doubleString);
 }
@@ -1007,12 +1014,20 @@ private boolean connectViaHelpNode(Node bestNode1, Node bestNode2) {
 	Node helpNode = new HelpNode(helpPoint);
 	
 	if(bestNode1.getPos().getX() == bestNode2.getPos().getX() || bestNode1.getPos().getY() == bestNode2.getPos().getY()) {
-		bestNode1.addEdge(bestNode2);
-		bestNode2.addEdge(bestNode1);
-		return true;
+		if(isCollisionFreeEdge(bestNode1, bestNode2)) {
+			bestNode1.addEdge(bestNode2);
+			bestNode2.addEdge(bestNode1);
+			return true;
+		}
+		return false;
 	}
 	if(isCollisionFreeEdge(bestNode1, helpNode) && isCollisionFreeEdge(helpNode, bestNode2)) {
-		nodes.add(helpNode);	
+		
+		for(Node n : nodes) {
+			if(n.getPos().equals(helpNode.getPos())){
+				helpNode = n;	
+			}
+		}
 		bestNode1.addEdge(helpNode);
 		helpNode.addEdge(bestNode1);
 		bestNode2.addEdge(helpNode);
@@ -1076,20 +1091,16 @@ private void connectGoalNode(Box b) {
 	
 	MovingBox movingBox = (MovingBox) b;
 	Node goalNode = movingBox.getGoalNode();
-	Node closestNode = null;
-	double distance = 100;
 	
 	for(Node n : nodes) {
 		if(n.equals(goalNode)) {
 			continue;
 		}
-		double currentDistance = n.calculateDistance(goalNode);
-		if(currentDistance < distance) {
-			distance = currentDistance;
-			closestNode = n;
+		if(n.calculateDistance(goalNode) < 2 * width) {
+			continue;
 		}
+		connectViaHelpNode(goalNode, n);
 	}
-	connectViaHelpNode(goalNode, closestNode);
 }
 
 /**

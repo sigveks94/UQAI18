@@ -15,13 +15,15 @@ public class Main {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input3.txt");
-            Program program = new Program(ps);
+        	String inputFile = "input2.txt";
+        	String outputFile = "finalOutput.txt";
+            ps.loadProblem(inputFile);
+            Program program = new Program(ps,outputFile);
             double startTime = System.nanoTime();
             program.run();
             double elapsedTime = System.nanoTime() - startTime;
             System.out.println("Elapsed time: " + elapsedTime/1000000 + " ms");
-            ps.loadSolution("finalOutput.txt");
+            ps.loadSolution(outputFile);
         } catch (IOException e) {
             System.out.println("IO Exception occured");
         }

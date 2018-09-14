@@ -38,6 +38,13 @@ public void setObstacleState(Box b, Point2D point) {
 
 
 public RobotConfig getRobotConfig() {
+	double x = robotConfig.getPos().getX();
+	double y = robotConfig.getPos().getY();
+	
+	x = Solver.doubleFormatter(x);
+	y = Solver.doubleFormatter(y);
+	Point2D point = new Point2D.Double(x, y);
+	robotConfig.setPos(point);
 	return robotConfig;
 }
 
@@ -46,7 +53,7 @@ public String returnRobotString() {
 }
 
 public String returnBoxString(Box b) {
-	return "" + b.getRect().getCenterX() + " " + b.getRect().getCenterY() + " ";
+	return "" + Solver.doubleFormatter(b.getRect().getCenterX()) + " " + Solver.doubleFormatter(b.getRect().getCenterY()) + " ";
 }
 
 public String returnBoxesString() {
@@ -58,7 +65,7 @@ public String returnBoxesString() {
 }
 
 public String returnObstacleString(Box b) {
-	return "" + b.getRect().getCenterX() + " " + b.getRect().getCenterY();
+	return "" + Solver.doubleFormatter(b.getRect().getCenterX()) + " " + Solver.doubleFormatter(b.getRect().getCenterY());
 }
 
 public String returnObstaclesString() {

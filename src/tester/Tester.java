@@ -29,7 +29,7 @@ public class Tester {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("input3.txt");
+            ps.loadProblem("input2.txt");
         } catch (IOException e1) {
             System.out.println("FAILED: Invalid problem file");
             System.out.println(e1.getMessage());

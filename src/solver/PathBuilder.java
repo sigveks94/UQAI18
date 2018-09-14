@@ -19,7 +19,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	private List<Point2D> outPutBoxPath;
 	private List<Node> inputRobotPath; //INPUTTED A-STARRRED PATH OF ROBOT BETWEEN ALL AVAILABLE NODES
 	private List<Node> inputBoxPath;   //INPUTTED A-STARRRED PATH OF BOX BETWEEN ALL AVAILABLE NODES
-	private final double validStepLength = 0.001;
+	private final double validStepLength = 0.0008;
 	private Box movingBox;
 	
 	public PathBuilder(Solver solver, State state, List<Node> robotPath, List<Node> boxPath, Box box) { //if robotPath == null - that means that the box is to be moved and the robotpath must be calculated
@@ -70,6 +70,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	
 	public String moveRobotToCorrectPosition() {
 		String line = "";
+		line += rotateRobotTo180Degrees();
 		double halfwidth = solver.getHalfWidth();
 		RobotConfig robotConfig = state.getRobotConfig();
 		Node centerBoxNode = inputRobotPath.get(inputRobotPath.size()-1);
@@ -95,7 +96,6 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 		double halfwidth = solver.getHalfWidth();
 		RobotConfig robot = state.getRobotConfig();
 		String lines = state.returnCompleteLineState() + "\n";
-		System.out.println(inputBoxPath);
 		Point2D firstPoint = inputBoxPath.get(0).getPos();
 		Point2D secondPoint = inputBoxPath.get(1).getPos();
 		
@@ -120,12 +120,11 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 	public String returnStringBulkFromMovingOnlyRobot() { //NEEDS TO FIND WAY TO RIGHT POSITION OF BOX AS WELL!!!!
 		RobotConfig robot = state.getRobotConfig();
 		String lines = state.returnCompleteLineState() + "\n"; 
-		lines += rotateRobotTo180Degrees();
 		
 		for(int i = 0; i < inputRobotPath.size() - 2; i++) {
 			Point2D fromPoint = inputRobotPath.get(i).getPos();
 			Point2D toPoint = inputRobotPath.get(i+1).getPos();
-			lines += returnStepsRobotDirect(fromPoint, toPoint, robot);
+			lines += returnStepsRobotDirect(robot.getPos(), toPoint, robot); //HER GJORDE VI ENDRING FRA fromPoint
 		}
 		lines += moveRobotToCorrectPosition();
 		// RETURN AN INTERPOLATED COMPLETE STRING CONTAINING THE PATH OF MOVING ROBOT FROM A TO B
@@ -270,6 +269,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 				
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				return line;
 
 			}
 			if(robot.getPos().getY() < b.getRect().getCenterY() -  0.0001) {//ROBOT IS UNDER THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE CLOCKWISE
@@ -283,6 +283,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 
 				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 				//The complete string resulting from this move (current -->reversePoint should be added to line
+				return line;
 			}
 			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
 				line += moveRobotRightHalfWidth(robot, halfwidth);
@@ -293,6 +294,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotLeftHalfWidth(robot, halfwidth);
 				line += moveRobotDownHalfWidth(robot, halfwidth);
 				line += moveRobotDownHalfWidth(robot, halfwidth);
+				return line;
 			}
 		}
 		
@@ -307,6 +309,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 				
 				line += moveRobotDownHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				return line;
 			}
 			
 			if(robot.getPos().getY() < b.getRect().getCenterY() -  0.0001) { //robot is under the box and needs to be rotated to the right hand side
@@ -319,6 +322,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 				
 				line += moveRobotUpHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+				return line;
 			}
 			
 			if(robot.getPos().getX() < b.getRect().getCenterX() -  0.0001) {//ROBOT IS LEFT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE RIGHT SIDE
@@ -330,6 +334,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotRightHalfWidth(robot, halfwidth);
 				line += moveRobotDownHalfWidth(robot, halfwidth);
 				line += moveRobotDownHalfWidth(robot, halfwidth);
+				return line;
 			}
 		}
 		
@@ -344,6 +349,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 				
 				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
+				return line;
 			}
 			
 			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) { //robot is right of the box and needs to be rotated beneath box
@@ -356,22 +362,64 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot down to the correct endpoint
 				
 				line += moveRobotLeftHalfWidth(robot, fakeHalfWidth); //moves robot down to the correct endpoint
+				return line;
 			}
 			
 			if(robot.getPos().getY() > b.getRect().getCenterY() +  0.0001) {//ROBOT IS ON TOP OF THE BOX AND NEEDS TO BE MOVED TO THE BOTTOM OF THE BOX
 				
-				line += moveRobotUpHalfWidth(robot, halfwidth);
-				line += returnStringFromRotating90AntiClockWise(robot);
-				line += moveRobotLeftHalfWidth(robot, halfwidth);
-				line += moveRobotDownHalfWidth(robot, halfwidth);
-				line += moveRobotDownHalfWidth(robot, halfwidth);
-				line += moveRobotDownHalfWidth(robot, halfwidth);
-				line += moveRobotDownHalfWidth(robot, halfwidth);
-				line += moveRobotRightHalfWidth(robot, halfwidth);
-				line += returnStringFromRotating90AntiClockWise(robot);
-				line += moveRobotUpHalfWidth(robot, halfwidth);
-				
-			}
+				Point2D underneathBox = new Point2D.Double(b.getRect().getCenterX(), b.getRect().getCenterY() - solver.getFakeWidth());
+				Point2D leftBox = new Point2D.Double(b.getRect().getCenterX() - solver.getFakeWidth(), b.getRect().getCenterY());
+				Point2D rightBox = new Point2D.Double(b.getRect().getCenterX() + solver.getFakeWidth(), b.getRect().getCenterY());
+				if(solver.isCollisionFreePoint(underneathBox)) {
+					if(solver.isCollisionFreePoint(leftBox)) {
+						line += moveRobotUpHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotLeftHalfWidth(robot, halfwidth);
+						line += moveRobotDownHalfWidth(robot, halfwidth);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotRightHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						return line;
+					}
+					else if (solver.isCollisionFreePoint(rightBox)) {
+						line += moveRobotUpHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotRightHalfWidth(robot, halfwidth);
+						line += moveRobotDownHalfWidth(robot, halfwidth);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotLeftHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						return line;
+					}
+					else {
+						System.out.println("Not solvable with our methods");
+					}
+				}
+				if(solver.isCollisionFreePoint(leftBox)) {
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotDownHalfWidth(robot, halfwidth);
+					line += moveRobotDownHalfWidth(robot, halfwidth  + 0.00005);
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					return line;
+				}
+				if (solver.isCollisionFreePoint(rightBox)) {
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotDownHalfWidth(robot, halfwidth);
+					line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					return line;
+				}
+		}
 		}
 		
 		if(direction == 4) { //GOING DOWN
@@ -385,6 +433,7 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 				
 				line += moveRobotRightHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+				return line;
 			}
 			
 			if(robot.getPos().getX() > b.getRect().getCenterX() +  0.0001) { //robot is right of the box and needs to be rotated beneath box
@@ -397,24 +446,66 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
 				
 				line += moveRobotLeftHalfWidth(robot, halfwidth); //moves robot up to the correct endpoint
+				
+				return line;
 			}
 			
-			if(robot.getPos().getY() < b.getRect().getCenterY() +  0.0001) {//ROBOT IS RIGHT SIDE OF THE BOX AND NEEDS TO BE MOVED TO THE LEFT SIDE
-				line += moveRobotDownHalfWidth(robot, halfwidth);
-				line += returnStringFromRotating90AntiClockWise(robot);
-				line += moveRobotLeftHalfWidth(robot, halfwidth);
-				line += moveRobotUpHalfWidth(robot, halfwidth);
-				line += moveRobotUpHalfWidth(robot, halfwidth);
-				line += moveRobotUpHalfWidth(robot, halfwidth);
-				line += moveRobotUpHalfWidth(robot, halfwidth);
-				line += moveRobotRightHalfWidth(robot, halfwidth);
-				line += returnStringFromRotating90AntiClockWise(robot);
-				line += moveRobotDownHalfWidth(robot, halfwidth);
+			if(robot.getPos().getY() < b.getRect().getCenterY() +  0.0001) {//ROBOT IS BOTTOM OF THE BOX AND NEEDS TO BE MOVED TO THE TOP
+				Point2D aboveBox = new Point2D.Double(b.getRect().getCenterX(), b.getRect().getCenterY() + solver.getFakeWidth());
+				Point2D leftBox = new Point2D.Double(b.getRect().getCenterX() - solver.getFakeWidth(), b.getRect().getCenterY());
+				Point2D rightBox = new Point2D.Double(b.getRect().getCenterX() + solver.getFakeWidth(), b.getRect().getCenterY());
+				if(solver.isCollisionFreePoint(aboveBox)) {
+					if(solver.isCollisionFreePoint(leftBox)) {
+						line += moveRobotDownHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotLeftHalfWidth(robot, halfwidth);
+						line += moveRobotUpHalfWidth(robot, halfwidth);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotRightHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						return line;
+					}
+					else if (solver.isCollisionFreePoint(rightBox)) {
+						line += moveRobotDownHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotRightHalfWidth(robot, halfwidth);
+						line += moveRobotUpHalfWidth(robot, halfwidth);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+						line += moveRobotLeftHalfWidth(robot, halfwidth);
+						line += returnStringFromRotating90AntiClockWise(robot);
+						line += moveRobotDownHalfWidth(robot, halfwidth + 0.00005);
+						return line;
+					}
+					else {
+						System.out.println("Not solvable with our methods");
+					}
+				}
+				if(solver.isCollisionFreePoint(leftBox)) {
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotUpHalfWidth(robot, halfwidth);
+					line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					return line;
+				}
+				if (solver.isCollisionFreePoint(rightBox)) {
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotRightHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotUpHalfWidth(robot, halfwidth);
+					line += moveRobotUpHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					line += moveRobotLeftHalfWidth(robot, halfwidth + 0.00005);
+					return line;
+					}
+				}
 			}
-		}
-		
-
-		return line; //RETURNS ENTIRE ROTATIONAL STRING SEGMENT CONTAINING ALL OBJECTS POSITION
+		return line;
 	}
 	
 	public String returnStringFromRotating90AntiClockWise(RobotConfig robot) {
