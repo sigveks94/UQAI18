@@ -62,6 +62,11 @@ public void addEdge(Node node) {
 	if(node == null) {
 		return;
 	}
+	for(Node n : edgeNodes) {
+		if(n.getPos().equals(node.getPos())) {
+			return;
+		}
+	}
 	edgeNodes.add(node);
 }
 

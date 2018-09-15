@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-        	String inputFile = "input2.txt";
+        	String inputFile = "tightPassage.txt";
         	String outputFile = "finalOutput.txt";
             ps.loadProblem(inputFile);
             Program program = new Program(ps,outputFile);

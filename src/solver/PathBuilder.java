@@ -80,12 +80,12 @@ public class PathBuilder { // CONTAINS ALL FUNCTIONS FOR INTERPOLATING A MOVE OF
 		
 		//UP
 		if(direction == 2) {
-			line += moveRobotUpHalfWidth(robotConfig, halfwidth);
+			line += moveRobotUpHalfWidth(robotConfig, movingBox.getRect().getMinY() - robotConfig.getPos().getY());
 		}
 		
 		//DOWN
 		if(direction == 4) {
-			line += moveRobotDownHalfWidth(robotConfig, halfwidth);
+			line += moveRobotDownHalfWidth(robotConfig, robotConfig.getPos().getY() - movingBox.getRect().getMaxY());
 		}
 		
 		return line;
