@@ -1,0 +1,73 @@
+FOLLOW THES STEPS:
+
+
+
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+H:\>cd C:\Users\s4545192\Downloads\UQAI18-master
+
+H:\>cd /d C:\Users\s4545192\Downloads\UQAI18-master
+
+C:\Users\s4545192\Downloads\UQAI18-master>ant
+Buildfile: C:\Users\s4545192\Downloads\UQAI18-master\build.xml
+
+compile:
+    [javac] C:\Users\s4545192\Downloads\UQAI18-master\build.xml:10: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+
+all:
+      [jar] Building jar: C:\Users\s4545192\Downloads\UQAI18-master\Main.jar
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+
+
+HERE CHANGE THE BUILD.XML IN TWO PLACES REFERRING TO MAIN AND PROBLEM.MAIN TO BECOME TESTER AND TESTER.TESTER
+
+C:\Users\s4545192\Downloads\UQAI18-master>ant
+Buildfile: C:\Users\s4545192\Downloads\UQAI18-master\build.xml
+
+compile:
+    [javac] C:\Users\s4545192\Downloads\UQAI18-master\build.xml:10: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+
+all:
+      [jar] Building jar: C:\Users\s4545192\Downloads\UQAI18-master\Tester.jar
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+
+
+
+HERE CHANGE THE BUILD.XML IN TWO PLACES REFERRING TO MAIN AND PROBLEM.MAIN TO BECOME VISUALISER AND VISUALISER.VISUALISER
+
+C:\Users\s4545192\Downloads\UQAI18-master>ant
+Buildfile: C:\Users\s4545192\Downloads\UQAI18-master\build.xml
+
+compile:
+    [javac] C:\Users\s4545192\Downloads\UQAI18-master\build.xml:10: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+
+all:
+      [jar] Building jar: C:\Users\s4545192\Downloads\UQAI18-master\Visualiser.jar
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+
+
+
+C:\Users\s4545192\Downloads\UQAI18-master>java -jar Main.jar input3.txt outputfilename.txt  <----- HERE IT MUST BE THE INPUTFILENAME GIVEN ON DEMO AND ANY OUTPUTFILENAME
+Elapsed time for generating output file572.110294 ms
+Finished loading!
+
+C:\Users\s4545192\Downloads\UQAI18-master>java -jar Tester.jar input3.txt outputfilename.txt
+Test Initial State
+Passed.
+Test Step Size
+Passed
+Test collision:
+Passed
+Test pushed objects
+Object not moving with robot or pushed to wrong direction at step 2199
+
+C:\Users\s4545192\Downloads\UQAI18-master>java -jar Visualiser.jar
+
+C:\Users\s4545192\Downloads\UQAI18-master>
