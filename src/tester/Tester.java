@@ -27,16 +27,18 @@ public class Tester {
      * @param args input file name for problem and solution
      */
     public static void main(String[] args) {
+    	String inputFile = args[0];
+    	String outputFile = args[1];
         ProblemSpec ps = new ProblemSpec();
         try {
-            ps.loadProblem("tightPassage.txt");
+            ps.loadProblem(inputFile);
         } catch (IOException e1) {
             System.out.println("FAILED: Invalid problem file");
             System.out.println(e1.getMessage());
             return;
         }
         try {
-            ps.loadSolution("finalOutput.txt");
+            ps.loadSolution(outputFile);
         } catch (IOException e1) {
             System.out.println("FAILED: Invalid solution file");
             System.out.println(e1.getMessage());

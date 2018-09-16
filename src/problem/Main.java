@@ -15,14 +15,14 @@ public class Main {
     public static void main(String[] args) {
         ProblemSpec ps = new ProblemSpec();
         try {
-        	String inputFile = "tightPassage.txt";
-        	String outputFile = "finalOutput.txt";
+        	String inputFile = args[0];
+        	String outputFile = args[1];
             ps.loadProblem(inputFile);
             Program program = new Program(ps,outputFile);
             double startTime = System.nanoTime();
             program.run();
             double elapsedTime = System.nanoTime() - startTime;
-            System.out.println("Elapsed time: " + elapsedTime/1000000 + " ms");
+            System.out.println("Elapsed time for generating output file" + elapsedTime/1000000 + " ms");
             ps.loadSolution(outputFile);
         } catch (IOException e) {
             System.out.println("IO Exception occured");
