@@ -11,10 +11,10 @@
     </target>
 
     <target name="all" depends="compile">
-        <jar destfile="./Tester.jar" basedir="build/classes">
+        <jar destfile="./Main.jar" basedir="build/classes">
             <manifest>
                 <!-- Uncomment the line for the desired main class -->
-                <attribute name="Main-Class" value="tester.Tester"/>
+                <attribute name="Main-Class" value="problem.Main"/>
                 <!--<attribute name="Main-Class" value="navigation.NavigationSolver"/>-->
             </manifest>
         </jar>
