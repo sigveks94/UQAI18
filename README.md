@@ -1,7 +1,10 @@
 # UQAI18
 UQ AI project 2018
 
-TestTest
+This is a motion-planning project performed at Univerisity of Queensland, Brisbane, in an introductory class COMP3702 on Artificial Intelligence by authors sigveks94 and ErlendHS.
+Full task description: http://robotics.itee.uq.edu.au/~ai/lib/exe/fetch.php/wiki/assignment1-0901.pdf 
+
+
 
 State space:
 
